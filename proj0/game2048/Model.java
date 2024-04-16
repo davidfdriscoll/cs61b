@@ -111,10 +111,46 @@ public class Model extends Observable {
         boolean changed;
         changed = false;
 
-        // TODO: Modify this.board (and perhaps this.score) to account
-        // for the tilt to the Side SIDE. If the board changed, set the
-        // changed local variable to true.
+        board.setViewingPerspective(side);
 
+        for (int col = 0; col < board.size(); col++) {
+            Tile lastTile = null;
+            int firstOpenSpace = -1;
+            int lastTileRow = -1;
+
+            for (int row = board.size() - 1; row >= 0; row--) {
+                Tile hereTile = board.tile(col, row);
+                // if no tile, this is an open space
+                if (hereTile == null) {
+                    if (firstOpenSpace == -1) firstOpenSpace = row;
+                }
+                // consider merging
+                else if (hereTile != null && lastTile != null && lastTile.value() == hereTile.value()) {
+                    board.move(col, lastTileRow, hereTile);
+                    if (firstOpenSpace == -1) firstOpenSpace = row;
+                    changed = true;
+                    score += 2 * lastTile.value();
+                    lastTile = null;
+                    lastTileRow = -1;
+                }
+                // consider moving
+                else if (hereTile != null && firstOpenSpace != -1) {
+                    board.move(col, firstOpenSpace, hereTile);
+                    lastTileRow = firstOpenSpace;
+                    firstOpenSpace = row;
+                    changed = true;
+                    lastTile = hereTile;
+                }
+                // otherwise leave tile alone
+                else {
+                    lastTile = hereTile;
+                    lastTileRow = row;
+                    firstOpenSpace = -1;
+                }
+            }
+        }
+
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
