@@ -140,7 +140,7 @@ public class Model extends Observable {
                     else if (firstOpenSpace != -1) {
                         board.move(col, firstOpenSpace, hereTile);
                         lastTileRow = firstOpenSpace;
-                        firstOpenSpace = firstOpenSpace;
+                        firstOpenSpace = firstOpenSpace - 1;
                         changed = true;
                         lastTile = hereTile;
                     } else {
