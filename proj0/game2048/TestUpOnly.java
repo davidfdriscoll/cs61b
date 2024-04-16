@@ -60,6 +60,31 @@ public class TestUpOnly extends TestUtils {
     }
 
     @Test
+    /** Move tiles up wth one merge. */
+    public void testUpMergeAndMove() {
+        int[][] before = new int[][] {
+                {2, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0},
+                {2, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0},
+                {8, 0, 0, 0, 0},
+        };
+        int[][] after = new int[][] {
+                {4, 0, 0, 0, 0},
+                {8, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0},
+        };
+
+        model = new Model(before, 0, 0, false);
+        String prevBoard = model.toString();
+        boolean changed = model.tilt(Side.NORTH);
+        checkChanged(Side.NORTH, true, changed);
+        checkModel(after, 4, 0, prevBoard, Side.NORTH);
+    }
+
+    @Test
     /** A basic merge. */
     public void testUpBasicMerge() {
         int[][] before = new int[][] {
