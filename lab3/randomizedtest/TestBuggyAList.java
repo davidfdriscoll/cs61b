@@ -10,8 +10,8 @@ import static org.junit.Assert.*;
 public class TestBuggyAList {
   @Test
   public void testThreeAddThreeRemove() {
-      AListNoResizing<Integer> goodList = new AListNoResizing<Integer>();
-      BuggyAList<Integer> badList = new BuggyAList<Integer>();
+      AListNoResizing<Integer> goodList = new AListNoResizing<>();
+      BuggyAList<Integer> badList = new BuggyAList<>();
 
       int[] nums = {1, 2, 3};
       for (int num: nums) {
@@ -26,8 +26,8 @@ public class TestBuggyAList {
 
     @Test
     public void testAddRemove1000() {
-        AListNoResizing<Integer> goodList = new AListNoResizing<Integer>();
-        BuggyAList<Integer> badList = new BuggyAList<Integer>();
+        AListNoResizing<Integer> goodList = new AListNoResizing<>();
+        BuggyAList<Integer> badList = new BuggyAList<>();
 
         int count = 1000;
         for (int i = 1; i <= count; i++) {
@@ -43,7 +43,7 @@ public class TestBuggyAList {
   @Test
     public void randomizedTest() {
       AListNoResizing<Integer> L = new AListNoResizing<>();
-      BuggyAList<Integer> badList = new BuggyAList<Integer>();
+      BuggyAList<Integer> badList = new BuggyAList<>();
 
       int N = 50000;
       for (int i = 0; i < N; i += 1) {
