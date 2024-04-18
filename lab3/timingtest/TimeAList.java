@@ -37,7 +37,7 @@ public class TimeAList {
         AList<Integer> opCounts = new AList<Integer>();
 
         int count = 1000;
-        int doublings = 15;
+        int doublings = 8;
         for (int i = 0; i < doublings; i++) {
             Ns.addLast(count);
             opCounts.addLast(count);

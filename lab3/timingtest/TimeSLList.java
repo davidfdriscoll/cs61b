@@ -26,7 +26,7 @@ public class TimeSLList {
         AList<Double> times = new AList<Double>();
         AList<Integer> opCounts = new AList<Integer>();
 
-        int count = 1000;
+        int count = 100;
         int doublings = 8;
         for (int i = 0; i < doublings; i++) {
             Ns.addLast(count);
