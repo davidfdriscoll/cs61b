@@ -24,6 +24,22 @@ public class TestBuggyAList {
       }
   }
 
+    @Test
+    public void testAddRemove1000() {
+        AListNoResizing<Integer> goodList = new AListNoResizing<Integer>();
+        BuggyAList<Integer> badList = new BuggyAList<Integer>();
+
+        int count = 1000;
+        for (int i = 1; i <= count; i++) {
+            goodList.addLast(i);
+            badList.addLast(i);
+        }
+
+        for (int i = 1; i <= count; i++) {
+            assertEquals(goodList.removeLast(), badList.removeLast());
+        }
+    }
+
   @Test
     public void randomizedTest() {
       AListNoResizing<Integer> L = new AListNoResizing<>();
