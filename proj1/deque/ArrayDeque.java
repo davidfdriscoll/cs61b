@@ -103,7 +103,7 @@ public class ArrayDeque<T> implements Deque<T> {
         if (size == 0) return null;
         if ((size < items.length / DIVIDER) && (size > DIVIDER)) {
             resize(items.length / DIVIDER);
-            }
+        }
         size--;
         nextLast = decIdx(nextLast);
         T removed = items[nextLast];
