@@ -1,5 +1,7 @@
 package deque;
 
+import java.util.Iterator;
+
 public interface Deque<T> {
 
     /**
@@ -64,7 +66,7 @@ public interface Deque<T> {
      * so we must provide this method to return an iterator.
      * @return
      */
-//    Iterator<T> iterator();
+    Iterator<T> iterator();
 
     /**
      * Returns whether the parameter o is equal to the Deque. o is considered equal if it is a Deque and

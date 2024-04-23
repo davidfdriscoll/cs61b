@@ -1,6 +1,9 @@
 package deque;
 
 import org.junit.Test;
+
+import java.util.Iterator;
+
 import static org.junit.Assert.*;
 
 
@@ -230,5 +233,21 @@ public class ArrayDequeTest {
         stringList.addLast("2");
         stringList.addLast("3");
         assertNotEquals(lld1, stringList);
+    }
+
+    @Test
+    public void iteratorTest() {
+        ArrayDeque<Integer> lld1 = new ArrayDeque<>();
+        lld1.addLast(1);
+        lld1.addLast(2);
+        lld1.addLast(3);
+
+        Iterator<Integer> iterator = lld1.iterator();
+
+        Integer i = 1;
+        while(iterator.hasNext()) {
+            assertEquals(i, iterator.next());
+            i += 1;
+        }
     }
 }

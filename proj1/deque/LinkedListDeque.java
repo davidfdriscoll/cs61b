@@ -1,5 +1,6 @@
 package deque;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 public class LinkedListDeque<T> implements Deque<T> {
@@ -103,6 +104,29 @@ public class LinkedListDeque<T> implements Deque<T> {
             index -= 1;
         }
         return pointer.item;
+    }
+
+    private class LinkedListDequeIterator implements Iterator<T> {
+        private Node pointer;
+
+        public LinkedListDequeIterator() {
+            pointer = sentinel.next;
+        }
+
+        public boolean hasNext() {
+            return pointer != sentinel;
+        }
+
+        public T next() {
+            T returnItem = pointer.item;
+            pointer = pointer.next;
+            return returnItem;
+        }
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
     }
 
     public boolean equals(Object o) {
