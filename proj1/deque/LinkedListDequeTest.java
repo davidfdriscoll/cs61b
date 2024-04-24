@@ -200,4 +200,20 @@ public class LinkedListDequeTest {
             i += 1;
         }
     }
+
+    @Test
+    public void checkEquality() {
+        LinkedListDeque<Integer> list1 = new LinkedListDeque<>();
+        LinkedListDeque<Integer> list2 = new LinkedListDeque<>();
+
+        list1.addFirst(1);
+        list2.addFirst(1);
+        assertEquals(list1, list2);
+
+        LinkedListDeque<LinkedListDeque<Integer>> bigList1 = new LinkedListDeque<>();
+        LinkedListDeque<LinkedListDeque<Integer>> bigList2 = new LinkedListDeque<>();
+        bigList1.addFirst(list1);
+        bigList2.addFirst(list2);
+        assertEquals(bigList1, bigList2);
+    }
 }

@@ -2,6 +2,7 @@ package deque;
 
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
@@ -239,5 +240,21 @@ public class ArrayDequeTest {
             assertEquals(i, iteratorValue);
             i += 1;
         }
+    }
+
+    @Test
+    public void checkEquality() {
+        ArrayDeque<Integer> list1 = new ArrayDeque<>();
+        ArrayDeque<Integer> list2 = new ArrayDeque<>();
+
+        list1.addFirst(1);
+        list2.addFirst(1);
+        assertEquals(list1, list2);
+
+        ArrayDeque<ArrayDeque<Integer>> bigList1 = new ArrayDeque<>();
+        ArrayDeque<ArrayDeque<Integer>> bigList2 = new ArrayDeque<>();
+        bigList1.addFirst(list1);
+        bigList2.addFirst(list2);
+        assertEquals(bigList1, bigList2);
     }
 }
