@@ -113,7 +113,7 @@ public class LinkedListDeque<T> implements Deque<T> {
     private class LinkedListDequeIterator implements Iterator<T> {
         private Node pointer;
 
-        public LinkedListDequeIterator() {
+        LinkedListDequeIterator() {
             pointer = sentinel.next;
         }
 
@@ -128,7 +128,6 @@ public class LinkedListDeque<T> implements Deque<T> {
         }
     }
 
-    @Override
     public Iterator<T> iterator() {
         return new LinkedListDequeIterator();
     }

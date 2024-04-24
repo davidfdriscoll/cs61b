@@ -66,14 +66,17 @@ public interface Deque<T> {
     /**
      * The Deque objects we’ll make are iterable (i.e. Iterable<T>)
      * so we must provide this method to return an iterator.
-     * @return
+     * @return iterator
      */
     Iterator<T> iterator();
 
     /**
-     * Returns whether the parameter o is equal to the Deque. o is considered equal if it is a Deque and
-     * if it contains the same contents (as governed by the generic T’s equals method) in the same order.
-     * (ADDED 2/12: You’ll need to use the instance of keywords for this. Read here for more information)
+     * Returns whether the parameter o is equal to the Deque.
+     * o is considered equal if it is a Deque and
+     * if it contains the same contents (as governed by
+     * the generic T’s equals method) in the same order.
+     * (ADDED 2/12: You’ll need to use the instance of keywords for this.
+     * Read here for more information)
      * @param o object to be considered
      * @return whether this deque is equal to the passed in object
      */
