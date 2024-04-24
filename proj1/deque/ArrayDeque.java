@@ -34,19 +34,26 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     private int incIdx(int idx) {
-        if (idx == items.length - 1) return 0;
-        else return idx + 1;
+        if (idx == items.length - 1) {
+            return 0;
+        } else {
+            return idx + 1;
+        }
     }
 
     private int decIdx(int idx) {
-        if (idx == 0) return items.length - 1;
-        else return idx - 1;
+        if (idx == 0) {
+            return items.length - 1;
+        } else {
+            return idx - 1;
+        }
     }
 
     @Override
     public void addFirst(T item) {
-        if (size == items.length)
+        if (size == items.length) {
             resize(items.length * MULTIPLIER);
+        }
         size++;
         items[nextFirst] = item;
         nextFirst = decIdx(nextFirst);
@@ -54,16 +61,12 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public void addLast(T item) {
-        if (size == items.length)
+        if (size == items.length) {
             resize(items.length * MULTIPLIER);
+        }
         size++;
         items[nextLast] = item;
         nextLast = incIdx(nextLast);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
     }
 
     @Override
@@ -72,7 +75,9 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     public String toString() {
-        if (size == 0) return "";
+        if (size == 0) {
+            return "";
+        }
         String str = items[nextFirst + 1].toString();
         int idx = nextFirst + 2;
         while (idx != nextLast) {
@@ -89,7 +94,9 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public T removeFirst() {
-        if (size == 0) return null;
+        if (size == 0) {
+            return null;
+        }
         if ((size < items.length / DIVIDER) && (size > DIVIDER)) {
             resize(items.length / DIVIDER);
         }
@@ -102,7 +109,9 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public T removeLast() {
-        if (size == 0) return null;
+        if (size == 0) {
+            return null;
+        }
         if ((size < items.length / DIVIDER) && (size > DIVIDER)) {
             resize(items.length / DIVIDER);
         }
@@ -142,12 +151,18 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     public boolean equals(Object o) {
-        if (!(o instanceof ArrayDeque)) return false;
+        if (!(o instanceof ArrayDeque)) {
+            return false;
+        }
         // cast, god forgive us
         ArrayDeque<T> castO = (ArrayDeque<T>) o;
-        if (size != castO.size()) return false;
+        if (size != castO.size()) {
+            return false;
+        }
         for (int i = 0; i < size; i++) {
-            if (get(i) != castO.get(i)) return false;
+            if (get(i) != castO.get(i)) {
+                return false;
+            }
         }
         return true;
     }

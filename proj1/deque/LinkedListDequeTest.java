@@ -19,11 +19,9 @@ public class LinkedListDequeTest {
 
         LinkedListDeque<String> lld1 = new LinkedListDeque<String>();
 
-		assertTrue("A newly initialized LLDeque should be empty", lld1.isEmpty());
-		lld1.addFirst("front");
+        assertTrue("A newly initialized LLDeque should be empty", lld1.isEmpty());
+        lld1.addFirst("front");
 
-		// The && operator is the same as "and" in Python.
-		// It's a binary operator that returns true if both arguments true, and false otherwise.
         assertEquals(1, lld1.size());
         assertFalse("lld1 should now contain 1 item", lld1.isEmpty());
         assertEquals("front", lld1.toString());
@@ -32,16 +30,16 @@ public class LinkedListDequeTest {
         assertEquals(2, lld1.size());
         assertEquals("second front", lld1.toString());
 
-		lld1.addLast("middle");
-		assertEquals(3, lld1.size());
+        lld1.addLast("middle");
+        assertEquals(3, lld1.size());
         assertEquals("second front middle", lld1.toString());
 
-		lld1.addLast("back");
-		assertEquals(4, lld1.size());
+        lld1.addLast("back");
+        assertEquals(4, lld1.size());
         assertEquals("second front middle back", lld1.toString());
 
-		System.out.println("Printing out deque: ");
-		lld1.printDeque();
+        System.out.println("Printing out deque: ");
+        lld1.printDeque();
     }
 
     @Test
@@ -49,18 +47,18 @@ public class LinkedListDequeTest {
     public void addRemoveTest() {
 
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
-		// should be empty
-		assertTrue("lld1 should be empty upon initialization", lld1.isEmpty());
+        // should be empty
+        assertTrue("lld1 should be empty upon initialization", lld1.isEmpty());
         assertNull(lld1.removeFirst());
 
-		lld1.addFirst(10);
-		// should not be empty
-		assertFalse("lld1 should contain 1 item", lld1.isEmpty());
+        lld1.addFirst(10);
+        // should not be empty
+        assertFalse("lld1 should contain 1 item", lld1.isEmpty());
         assertEquals("10", lld1.toString());
 
-		int removed = lld1.removeFirst();
-		// should be empty
-		assertTrue("lld1 should be empty after removal", lld1.isEmpty());
+        int removed = lld1.removeFirst();
+        // should be empty
+        assertTrue("lld1 should be empty after removal", lld1.isEmpty());
         assertEquals(10, removed);
         assertNull(lld1.removeFirst());
     }
@@ -143,15 +141,17 @@ public class LinkedListDequeTest {
     public void bigLLDequeTest() {
 
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
-        for (int i = 0; i < 1000000; i++) {
+        int runs = 1000000;
+        for (int i = 0; i < runs; i++) {
             lld1.addLast(i);
         }
 
-        for (double i = 0; i < 500000; i++) {
+        int halfRuns = runs / 2;
+        for (double i = 0; i < halfRuns; i++) {
             assertEquals("Should have the same value", i, (double) lld1.removeFirst(), 0.0);
         }
 
-        for (double i = 999999; i > 500000; i--) {
+        for (double i = runs - 1; i > halfRuns; i--) {
             assertEquals("Should have the same value", i, (double) lld1.removeLast(), 0.0);
         }
 
@@ -194,7 +194,7 @@ public class LinkedListDequeTest {
         Iterator<Integer> iterator = lld1.iterator();
 
         Integer i = 1;
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             assertEquals(i, iterator.next());
             i += 1;
         }

@@ -8,9 +8,9 @@ public class LinkedListDeque<T> implements Deque<T> {
     private int size;
 
     public class Node {
-        public Node prev;
-        public T item;
-        public Node next;
+        private Node prev;
+        private final T item;
+        private Node next;
 
         public Node(T i, Node p, Node n) {
             item = i;
@@ -46,10 +46,6 @@ public class LinkedListDeque<T> implements Deque<T> {
         size += 1;
     }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
     @Override
     public int size() {
         return size;
@@ -57,7 +53,9 @@ public class LinkedListDeque<T> implements Deque<T> {
 
     // construct a string of the list beginning with this pointer
     private String toStringHelper(Node pointer) {
-        if (pointer == sentinel) return "";
+        if (pointer == sentinel) {
+            return "";
+        }
         String rest = toStringHelper(pointer.next);
         if (Objects.equals(rest, "")) {
             return pointer.item.toString();
@@ -77,7 +75,9 @@ public class LinkedListDeque<T> implements Deque<T> {
 
     @Override
     public T removeFirst() {
-        if (size == 0) return null;
+        if (size == 0) {
+            return null;
+        }
         size -= 1;
         Node removedNode = sentinel.next;
         sentinel.next = removedNode.next;
@@ -87,7 +87,9 @@ public class LinkedListDeque<T> implements Deque<T> {
 
     @Override
     public T removeLast() {
-        if (size == 0) return null;
+        if (size == 0) {
+            return null;
+        }
         size -= 1;
         Node removedNode = sentinel.prev;
         sentinel.prev = removedNode.prev;
@@ -97,7 +99,9 @@ public class LinkedListDeque<T> implements Deque<T> {
 
     @Override
     public T get(int index) {
-        if (size == 0 || index >= size) return null;
+        if (size == 0 || index >= size) {
+            return null;
+        }
         Node pointer = sentinel.next;
         while (index > 0) {
             pointer = pointer.next;
@@ -130,12 +134,18 @@ public class LinkedListDeque<T> implements Deque<T> {
     }
 
     public boolean equals(Object o) {
-        if (!(o instanceof LinkedListDeque)) return false;
+        if (!(o instanceof LinkedListDeque)) {
+            return false;
+        }
         // cast, god forgive us
         LinkedListDeque<T> castO = (LinkedListDeque<T>) o;
-        if (size != castO.size()) return false;
+        if (size != castO.size()) {
+            return false;
+        }
         for (int i = 0; i < size; i++) {
-            if (get(i) != castO.get(i)) return false;
+            if (get(i) != castO.get(i)) {
+                return false;
+            }
         }
         return true;
     }
