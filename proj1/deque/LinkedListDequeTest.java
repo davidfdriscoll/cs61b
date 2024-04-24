@@ -24,19 +24,15 @@ public class LinkedListDequeTest {
 
         assertEquals(1, lld1.size());
         assertFalse("lld1 should now contain 1 item", lld1.isEmpty());
-        assertEquals("front", lld1.toString());
 
         lld1.addFirst("second");
         assertEquals(2, lld1.size());
-        assertEquals("second front", lld1.toString());
 
         lld1.addLast("middle");
         assertEquals(3, lld1.size());
-        assertEquals("second front middle", lld1.toString());
 
         lld1.addLast("back");
         assertEquals(4, lld1.size());
-        assertEquals("second front middle back", lld1.toString());
 
         System.out.println("Printing out deque: ");
         lld1.printDeque();
@@ -54,7 +50,6 @@ public class LinkedListDequeTest {
         lld1.addFirst(10);
         // should not be empty
         assertFalse("lld1 should contain 1 item", lld1.isEmpty());
-        assertEquals("10", lld1.toString());
 
         int removed = lld1.removeFirst();
         // should be empty
@@ -73,16 +68,23 @@ public class LinkedListDequeTest {
 
         lld1.addLast(2);
         lld1.addFirst(1);
-        assertEquals("1 2", lld1.toString());
         assertEquals(Integer.valueOf(1), lld1.get(0));
         assertEquals(Integer.valueOf(2), lld1.get(1));
         assertNull(lld1.get(2));
 
+        // check getRecursive
+        assertEquals(Integer.valueOf(1), lld1.getRecursive(0));
+        assertEquals(Integer.valueOf(2), lld1.getRecursive(1));
+        assertNull(lld1.getRecursive(2));
+
         int removed = lld1.removeLast();
         assertEquals(2, removed);
-        assertEquals("1", lld1.toString());
         assertEquals(Integer.valueOf(1), lld1.get(0));
         assertNull(lld1.get(1));
+
+        // check getRecursive
+        assertEquals(Integer.valueOf(1), lld1.getRecursive(0));
+        assertNull(lld1.getRecursive(1));
     }
 
     @Test
@@ -145,6 +147,7 @@ public class LinkedListDequeTest {
         for (int i = 0; i < runs; i++) {
             lld1.addLast(i);
         }
+        assertEquals(lld1.get(runs / 100), lld1.getRecursive(runs / 100));
 
         int halfRuns = runs / 2;
         for (double i = 0; i < halfRuns; i++) {
@@ -191,11 +194,9 @@ public class LinkedListDequeTest {
         lld1.addLast(2);
         lld1.addLast(3);
 
-        Iterator<Integer> iterator = lld1.iterator();
-
         Integer i = 1;
-        while (iterator.hasNext()) {
-            assertEquals(i, iterator.next());
+        for (Integer iteratorValue: lld1) {
+            assertEquals(i, iteratorValue);
             i += 1;
         }
     }

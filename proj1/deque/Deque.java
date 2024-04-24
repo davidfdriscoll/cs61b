@@ -31,10 +31,6 @@ public interface Deque<T> {
      */
     int size();
 
-
-    /** Method to return a string representation of an Deque */
-    String toString();
-
     /**
      * Prints the items in the deque from first to last, separated by a space.
      * Once all the items have been printed, print out a new line.

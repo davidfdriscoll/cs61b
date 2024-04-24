@@ -26,19 +26,15 @@ public class ArrayDequeTest {
         // It's a binary operator that returns true if both arguments true, and false otherwise.
         assertEquals(1, lld1.size());
         assertFalse("lld1 should now contain 1 item", lld1.isEmpty());
-        assertEquals("front", lld1.toString());
 
         lld1.addFirst("second");
         assertEquals(2, lld1.size());
-        assertEquals("second front", lld1.toString());
 
         lld1.addLast("middle");
         assertEquals(3, lld1.size());
-        assertEquals("second front middle", lld1.toString());
 
         lld1.addLast("back");
         assertEquals(4, lld1.size());
-        assertEquals("second front middle back", lld1.toString());
 
         System.out.println("Printing out deque: ");
         lld1.printDeque();
@@ -52,7 +48,6 @@ public class ArrayDequeTest {
             l.addLast(i);
         }
         assertEquals(8, l.size());
-        assertEquals("1 2 3 4 5 6 7 8", l.toString());
         for (int i = 0; i < 8; i++) {
             assertEquals(Integer.valueOf(i + 1), l.get(i));
         }
@@ -107,7 +102,6 @@ public class ArrayDequeTest {
         lld1.addFirst(10);
         // should not be empty
         assertFalse("lld1 should contain 1 item", lld1.isEmpty());
-        assertEquals("10", lld1.toString());
 
         int removed = lld1.removeFirst();
         // should be empty
@@ -126,14 +120,12 @@ public class ArrayDequeTest {
 
         lld1.addLast(2);
         lld1.addFirst(1);
-        assertEquals("1 2", lld1.toString());
         assertEquals(Integer.valueOf(1), lld1.get(0));
         assertEquals(Integer.valueOf(2), lld1.get(1));
         assertNull(lld1.get(2));
 
         int removed = lld1.removeLast();
         assertEquals(2, removed);
-        assertEquals("1", lld1.toString());
         assertEquals(Integer.valueOf(1), lld1.get(0));
         assertNull(lld1.get(1));
     }
@@ -242,11 +234,9 @@ public class ArrayDequeTest {
         lld1.addLast(2);
         lld1.addLast(3);
 
-        Iterator<Integer> iterator = lld1.iterator();
-
         Integer i = 1;
-        while (iterator.hasNext()) {
-            assertEquals(i, iterator.next());
+        for (Integer iteratorValue: lld1) {
+            assertEquals(i, iteratorValue);
             i += 1;
         }
     }

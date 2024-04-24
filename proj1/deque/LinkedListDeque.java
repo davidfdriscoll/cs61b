@@ -3,7 +3,7 @@ package deque;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class LinkedListDeque<T> implements Deque<T> {
+public class LinkedListDeque<T> implements Iterable<T>, Deque<T>  {
     private final Node sentinel;
     private int size;
 
@@ -64,13 +64,13 @@ public class LinkedListDeque<T> implements Deque<T> {
         }
     }
 
-    public String toString() {
+    private String makeString() {
         return toStringHelper(sentinel.next);
     }
 
     @Override
     public void printDeque() {
-        System.out.println(toString());
+        System.out.println(makeString());
     }
 
     @Override
@@ -132,16 +132,32 @@ public class LinkedListDeque<T> implements Deque<T> {
         return new LinkedListDequeIterator();
     }
 
+    private T getRecursiveHelper(int index, Node pointer) {
+        if (index == 0) {
+            return pointer.item;
+        } else {
+            return getRecursiveHelper(index - 1, pointer.next);
+        }
+    }
+
+    public T getRecursive(int index) {
+        if (size == 0 || index >= size) {
+            return null;
+        }
+        return getRecursiveHelper(index, sentinel.next);
+    }
+
+    @Override
     public boolean equals(Object o) {
-        if (!(o instanceof LinkedListDeque)) {
+        if (!(o instanceof Deque)) {
             return false;
         }
         // cast, god forgive us
-        LinkedListDeque<T> castO = (LinkedListDeque<T>) o;
-        if (size != castO.size()) {
+        Deque<T> castO = (Deque<T>) o;
+        if (size() != castO.size()) {
             return false;
         }
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size(); i++) {
             if (get(i) != castO.get(i)) {
                 return false;
             }
