@@ -56,11 +56,10 @@ public class CapersRepository {
      * @param text String of the text to be appended to the story
      */
     public static void writeStory(String text) {
-        File storyFile = Utils.join(CAPERS_FOLDER, "story");
-        String story = Utils.readContentsAsString(storyFile);
+        String story = Utils.readContentsAsString(STORY_FILE);
         story = story + text + "\n";
         System.out.print(story);
-        Utils.writeContents(storyFile, story);
+        Utils.writeContents(STORY_FILE, story);
     }
 
     /**
