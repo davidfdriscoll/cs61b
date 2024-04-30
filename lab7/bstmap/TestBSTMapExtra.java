@@ -129,4 +129,15 @@ public class TestBSTMapExtra {
         assertEquals(5, size);
     }
 
+    @Test
+    public void printInOrderTest() {
+        BSTMap<Integer,String> map = new BSTMap<>();
+        map.put(3, "3");
+        map.put(1, "1");
+        map.put(2, "2");
+        map.put(4, "4");
+        System.out.println("expect 1 2 3 4");
+        map.printInOrder();
+    }
+
 }
