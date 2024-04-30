@@ -2,15 +2,16 @@ package bstmap;
 
 import java.util.*;
 
-public class BSTMap<K extends Comparable,V> implements Map61B<K,V> {
+public class BSTMap<K extends Comparable<K>,V> implements Map61B<K,V> {
     private class BSTNode<Y> {
-        private final Y key;
+        private Y key;
         private V value;
         private BSTNode<Y> left;
         private BSTNode<Y> right;
 
-        public BSTNode(Y key, BSTNode<Y> left, BSTNode<Y> right) {
+        public BSTNode(Y key, V value, BSTNode<Y> left, BSTNode<Y> right) {
             this.key = key;
+            this.value = value;
             this.left = left;
             this.right = right;
         }
@@ -31,19 +32,30 @@ public class BSTMap<K extends Comparable,V> implements Map61B<K,V> {
 
     @Override
     public boolean containsKey(K key) {
-        BSTNode<K> getNode = traverse(root, key, false);
-        return getNode != null;
+        BSTNode<K> node = getHelper(root, key);
+        return node != null;
+    }
+
+    private BSTNode<K> getHelper(BSTNode<K> node, K key) {
+        if (node == null) {
+            return null;
+        }
+        if (key.compareTo(node.key) == 0) {
+            return node;
+        } else if (key.compareTo(node.key) < 0) {
+            return getHelper(node.left, key);
+        } else {
+            return getHelper(node.right, key);
+        }
     }
 
     @Override
     public V get(K key) {
-        BSTNode<K> getNode = traverse(root, key, false);
-        if (getNode == null) {
+        BSTNode<K> node = getHelper(root, key);
+        if (node == null) {
             return null;
         }
-        else {
-            return getNode.value;
-        }
+        return node.value;
     }
 
     @Override
@@ -51,47 +63,103 @@ public class BSTMap<K extends Comparable,V> implements Map61B<K,V> {
         return size;
     }
 
-    private BSTNode<K> traverse(BSTNode<K> node, K key, boolean insert) {
+    private BSTNode<K> putHelper(BSTNode<K> node, K key, V value) {
         if (node == null) {
-            if (insert) {
-                return new BSTNode<>(key);
-            } else {
-                return null;
-            }
-        } else if (key.compareTo(node.key) == 0) {
-            return node;
-        } else if (key.compareTo(node.key) < 0) {
-            node.left = traverse(node.left, key, insert);
-            return node.left;
-        } else {
-            node.right = traverse(node.right, key, insert);
-            return node.right;
+            return new BSTNode<K>(key, value, null, null);
         }
+        int cmp = key.compareTo(node.key);
+        if (cmp == 0) {
+            node.key = key;
+            node.value = value;
+        } else if (cmp < 0) {
+            node.left = putHelper(node.left, key, value);
+        } else {
+            node.right = putHelper(node.right, key, value);
+        }
+        return node;
     }
 
     @Override
     public void put(K key, V value) {
-        BSTNode<K> newNode = traverse(root, key, true);
-        if (root == null) {
-            root = newNode;
-        }
-        newNode.value = value;
+        root = putHelper(root, key, value);
         size++;
     }
 
     @Override
     public Set<K> keySet() {
-        throw new UnsupportedOperationException();
+        final Deque<BSTNode<K>> queue = new LinkedList<>();
+        final Set<K> set = new HashSet<>();
+
+        queue.addLast(root);
+        while (!queue.isEmpty()) {
+            BSTNode<K> node = queue.removeFirst();
+            if (node == null) {
+                continue;
+            }
+            set.add(node.key);
+            queue.addLast(node.left);
+            queue.addLast(node.right);
+        }
+
+        return set;
+    }
+
+    private BSTNode<K> findMax(BSTNode<K> node) {
+        if (node.right == null) {
+            return node;
+        } else {
+            return findMax(node.right);
+        }
+    }
+
+    private BSTNode<K> removeHelper(BSTNode<K> node, K key) {
+        int cmp = key.compareTo(node.key);
+        if (cmp < 0) {
+            node.left = removeHelper(node.left, key);
+            return node;
+        }
+        if (cmp > 0) {
+            node.right = removeHelper(node.right, key);
+            return node;
+        }
+
+        // has no children
+        if (node.left == null && node.right == null) {
+            node = null;
+            return node;
+        } else if (node.left != null && node.right == null) {
+        // has only left
+            node = node.left;
+            return node;
+        // has only right
+        } else if (node.right != null && node.left == null) {
+            node = node.right;
+            return node;
+        }
+        // has both children
+        else {
+            BSTNode<K> successor = findMax(node.left);
+            successor.right = node.right;
+            node = successor;
+            return node;
+        }
     }
 
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+        V value = get(key);
+        return remove(key, value);
     }
 
     @Override
     public V remove(K key, V value) {
-        return remove(key);
+        V valueFromMap = get(key);
+        if (valueFromMap != value) {
+            throw new InputMismatchException();
+        }
+        root = removeHelper(root, key);
+        size--;
+        return value;
     }
 
     private class BSTMapIterator implements Iterator<K> {

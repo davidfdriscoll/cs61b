@@ -1,0 +1,66 @@
+This program inserts random Strings of length L into different types of maps as <String, Integer> pairs.
+Please enter desired length of each string: 100
+
+Enter # strings to insert into the maps: 100
+class bstmap.ULLMap: 0.00 sec
+class bstmap.BSTMap: 0.00 sec
+Java's Built-in TreeMap: 0.00 sec
+Java's Built-in HashMap: 0.00 sec
+Would you like to try more timed-tests? (y/n)y
+
+Enter # strings to insert into the maps: 1000
+class bstmap.ULLMap: 0.02 sec
+class bstmap.BSTMap: 0.00 sec
+Java's Built-in TreeMap: 0.00 sec
+Java's Built-in HashMap: 0.00 sec
+Would you like to try more timed-tests? (y/n)y
+
+Enter # strings to insert into the maps: 10000
+class bstmap.ULLMap: 0.48 sec
+class bstmap.BSTMap: 0.01 sec
+Java's Built-in TreeMap: 0.01 sec
+Java's Built-in HashMap: 0.01 sec
+Would you like to try more timed-tests? (y/n)y
+
+Enter # strings to insert into the maps: 25000
+class bstmap.ULLMap: 3.06 sec
+class bstmap.BSTMap: 0.03 sec
+Java's Built-in TreeMap: 0.03 sec
+Java's Built-in HashMap: 0.02 sec
+Would you like to try more timed-tests? (y/n)y
+
+Enter # strings to insert into the maps: 50000
+class bstmap.ULLMap: 12.77 sec
+class bstmap.BSTMap: 0.05 sec
+Java's Built-in TreeMap: 0.05 sec
+Java's Built-in HashMap: 0.05 sec
+Would you like to try more timed-tests? (y/n)n
+
+Process finished with exit code 0
+
+---
+
+This program inserts lexicographically increasing Strings into Maps as <String, Integer> pairs.
+
+Enter # strings to insert into the maps: 100
+class bstmap.ULLMap: 0.00 sec
+class bstmap.BSTMap: 0.00 sec
+Java's Built-in TreeMap: 0.00 sec
+Java's Built-in HashMap: 0.00 sec
+Would you like to try more timed-tests? (y/n): y
+
+Enter # strings to insert into the maps: 10000
+class bstmap.ULLMap: 0.55 sec
+class bstmap.BSTMap: 0.43 sec
+Java's Built-in TreeMap: 0.01 sec
+Java's Built-in HashMap: 0.00 sec
+Would you like to try more timed-tests? (y/n): y
+
+Enter # strings to insert into the maps: 50000
+class bstmap.ULLMap: 11.96 sec
+class bstmap.BSTMap: 8.63 sec
+Java's Built-in TreeMap: 0.02 sec
+Java's Built-in HashMap: 0.02 sec
+Would you like to try more timed-tests? (y/n): n
+
+Process finished with exit code 0
