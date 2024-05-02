@@ -1,6 +1,9 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
+
+import static gitlet.Folder.FOLDERS_FOLDER;
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
@@ -25,5 +28,26 @@ public class Repository {
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
+    public static File HEAD_FILE = Utils.join(GITLET_DIR, "HEAD");
+    public static File OBJECTS_FOLDER = Utils.join(GITLET_DIR, "objects");
+    public static File COMMITS_FOLDER = Utils.join(OBJECTS_FOLDER, "commits");
+    public static File FILES_FOLDER = Utils.join(OBJECTS_FOLDER, "files");
+
     /* TODO: fill in the rest of this class. */
+    public static void init() {
+        if (GITLET_DIR.exists()) {
+            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            return;
+        }
+        GITLET_DIR.mkdir();
+        OBJECTS_FOLDER.mkdir();
+        COMMITS_FOLDER.mkdir();
+        FILES_FOLDER.mkdir();
+        FOLDERS_FOLDER.mkdir();
+        try {
+            HEAD_FILE.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

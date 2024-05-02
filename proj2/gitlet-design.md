@@ -1,23 +1,47 @@
 # Gitlet Design Document
 
-**Name**:
+**Name**: David Driscoll
 
 ## Classes and Data Structures
 
-### Class 1
+### Directory structure
+
+```
+.gitlet
+  HEAD
+  objects
+    commits
+    files
+    folders
+  refs
+    heads
+```
+
+### File
 
 #### Fields
 
-1. Field 1
-2. Field 2
+1. String name
+2. byte[] contents
+2. String sha
 
 
-### Class 2
+### Folder
 
 #### Fields
 
-1. Field 1
-2. Field 2
+1. Map<String filename, String sha> files
+2. String sha
+
+### Commit
+
+#### Fields
+
+1. String sha
+2. Folder folder 
+3. Commit parent
+4. Commit mergeParent
+5. Date timestamp
 
 
 ## Algorithms
