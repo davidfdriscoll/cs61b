@@ -57,7 +57,7 @@ public class Folder implements Serializable {
         Utils.writeObject(file, this);
     }
 
-    public void addFileBlob(String filename, String fileSha) {
+    public void addFile(String filename, String fileSha) {
         folder.put(filename, fileSha);
     }
 

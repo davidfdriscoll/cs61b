@@ -37,7 +37,8 @@ public class Repository {
         Folder emptyFolder = Folder.emptyFolder();
         String emptyFolderSha = emptyFolder.generateSha();
         emptyFolder.saveToSha(emptyFolderSha);
-        StagingArea.setFolder(emptyFolder);
+
+        StagingArea.clear();
 
         Commit initialCommit = Commit.initialCommit();
         initialCommit.save();
@@ -45,40 +46,33 @@ public class Repository {
     }
 
     public static void add(String filename) {
-        File file = Utils.join(CWD, filename);
-        if (!file.exists()) {
-            System.out.println("File does not exist.");
-            return;
-        }
-        byte[] fileContents = Utils.readContents(file);
-
-        FileBlob blob = new FileBlob(fileContents);
+        FileBlob blob = FileBlob.fromFilename(filename);
         blob.save();
 
-        Folder stagingArea = StagingArea.getFolder();
-        stagingArea.addFileBlob(filename, blob.getSha());
-        StagingArea.setFolder(stagingArea);
+        StagingArea.addFile(filename, blob);
     }
 
     public static void commit(String message) {
         String currentCommitSha = Head.getCommitSha();
         Commit currentCommit = Commit.fromSha(currentCommitSha);
         String currentCommitFolderSha = currentCommit.getFolderSha();
+        Folder currentFolder = Folder.fromSha(currentCommitFolderSha);
 
-        Folder stagingArea = StagingArea.getFolder();
-        String stagingAreaSha = stagingArea.generateSha();
-        if (Objects.equals(stagingAreaSha, currentCommitFolderSha)) {
+        Folder newFolder = StagingArea.updateFolder(currentFolder);
+        String newFolderSha = newFolder.generateSha();
+        if (Objects.equals(newFolderSha, currentCommitFolderSha)) {
             System.out.println("No changes added to the commit.");
             return;
         }
-        stagingArea.saveToSha(stagingAreaSha);
+        newFolder.saveToSha(newFolderSha);
 
         Long timestamp = new Date().getTime();
         Commit newCommit = new Commit(
-            message, stagingAreaSha, currentCommitSha, "-1", timestamp
+            message, newFolderSha, currentCommitSha, "-1", timestamp
         );
         newCommit.save();
 
+        StagingArea.clear();
         Head.setCommitSha(newCommit.getSha());
     }
 
