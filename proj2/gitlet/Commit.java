@@ -5,7 +5,8 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Date; // TODO: You'll likely use this in this class
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static gitlet.Repository.OBJECTS_FOLDER;
 
@@ -33,6 +34,7 @@ public class Commit implements Serializable {
     private String parentSha;
     private String mergeParentSha;
     private Long timestamp;
+    private String sha;
 
     /* TODO: fill in the rest of this class. */
     Commit(
@@ -47,11 +49,18 @@ public class Commit implements Serializable {
         this.parentSha = parentSha;
         this.mergeParentSha = mergeParentSha;
         this.timestamp = timestamp;
+        this.sha = Utils.sha1(
+                    message,
+                    folderSha,
+                    parentSha,
+                    mergeParentSha,
+                    timestamp.toString()
+                );
     }
 
     public static Commit initialCommit() {
         Folder emptyFolder = Folder.emptyFolder();
-        String emptyFolderSha = Folder.generateSha(emptyFolder);
+        String emptyFolderSha = emptyFolder.generateSha();
         return new Commit(
             "initial commit",
             emptyFolderSha,
@@ -61,23 +70,22 @@ public class Commit implements Serializable {
         );
     }
 
-    public static String generateSha(Commit commit) {
-        return Utils.sha1(
-            commit.message,
-            commit.folderSha,
-            commit.parentSha,
-            commit.mergeParentSha,
-            commit.timestamp.toString()
-        );
+    public String getSha() {
+        return sha;
     }
+    public String getParentSha() { return parentSha; }
+    public String getFolderSha() { return folderSha; }
 
-    public static Commit fromFile(String commitSha) {
+    public static Commit fromSha(String commitSha) {
         File commitFile = Utils.join(COMMITS_FOLDER, commitSha);
+        if (!commitFile.exists()) {
+            System.out.println("No commit with that id exists.");
+            throw new RuntimeException();
+        }
         return Utils.readObject(commitFile, Commit.class);
     }
 
     public void save() {
-        String sha = generateSha(this);
         File commitFile = Utils.join(COMMITS_FOLDER, sha);
         if (!commitFile.exists()) {
             try {
@@ -87,5 +95,16 @@ public class Commit implements Serializable {
             }
         }
         Utils.writeObject(commitFile, this);
+    }
+
+    public void print() {
+        Date date = new Date(timestamp);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E MMM d hh:mm:ss yyyy Z");
+
+        System.out.println("===");
+        System.out.println("commit " + sha);
+        System.out.println("Date: " + simpleDateFormat.format(date));
+        System.out.println(message);
+        System.out.println();
     }
 }

@@ -23,7 +23,6 @@
 
 1. String name
 2. byte[] contents
-2. String sha
 
 
 ### Folder
@@ -31,17 +30,15 @@
 #### Fields
 
 1. Map<String filename, String sha> files
-2. String sha
 
 ### Commit
 
 #### Fields
 
-1. String sha
-2. Folder folder 
-3. Commit parent
-4. Commit mergeParent
-5. Date timestamp
+1. String folderSha 
+2. String parentSha
+3. String mergeParentSha
+4. Long timestamp
 
 
 ## Algorithms
