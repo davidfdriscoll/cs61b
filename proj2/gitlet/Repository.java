@@ -55,12 +55,12 @@ public class Repository {
     public static void commit(String message) {
         String currentCommitSha = Head.getCommitSha();
         Commit currentCommit = Commit.fromSha(currentCommitSha);
-        String currentCommitFolderSha = currentCommit.getFolderSha();
-        Folder currentFolder = Folder.fromSha(currentCommitFolderSha);
+        String currentFolderSha = currentCommit.getFolderSha();
+        Folder currentFolder = Folder.fromSha(currentFolderSha);
 
         Folder newFolder = StagingArea.updateFolder(currentFolder);
         String newFolderSha = newFolder.generateSha();
-        if (Objects.equals(newFolderSha, currentCommitFolderSha)) {
+        if (Objects.equals(newFolderSha, currentFolderSha)) {
             System.out.println("No changes added to the commit.");
             return;
         }
