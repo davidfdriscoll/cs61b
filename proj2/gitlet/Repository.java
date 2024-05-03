@@ -3,6 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 
+import static gitlet.Commit.COMMITS_FOLDER;
 import static gitlet.Folder.FOLDERS_FOLDER;
 import static gitlet.Utils.*;
 
@@ -30,7 +31,6 @@ public class Repository {
 
     public static File HEAD_FILE = Utils.join(GITLET_DIR, "HEAD");
     public static File OBJECTS_FOLDER = Utils.join(GITLET_DIR, "objects");
-    public static File COMMITS_FOLDER = Utils.join(OBJECTS_FOLDER, "commits");
     public static File FILES_FOLDER = Utils.join(OBJECTS_FOLDER, "files");
 
     /* TODO: fill in the rest of this class. */
@@ -44,10 +44,10 @@ public class Repository {
         COMMITS_FOLDER.mkdir();
         FILES_FOLDER.mkdir();
         FOLDERS_FOLDER.mkdir();
-        try {
-            HEAD_FILE.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Folder emptyFolder = Folder.emptyFolder();
+        emptyFolder.save();
+        StagingArea.setFolderSha(Folder.generateSha(emptyFolder));
+        Commit initialCommit = Commit.initialCommit();
+        initialCommit.save();
     }
 }
