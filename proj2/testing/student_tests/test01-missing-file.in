@@ -1,0 +1,25 @@
+# Error handling
+> init
+<<<
+> init
+A Gitlet version-control system already exists in the current directory.
+<<<
+> add missing.txt
+File does not exist.
+<<<
+> commit
+Please enter a commit message.
+<<<
+> commit "no changes"
+No changes added to the commit.
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "add wug.txt"
+<<<
+> add wug.txt
+<<<
+> commit "add identical wug.txt"
+No changes added to the commit.
+<<<

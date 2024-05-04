@@ -1,0 +1,18 @@
+# add existing
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "version 1 of wug.txt"
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+= wug.txt notwug.txt
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "readd wug.txt"
+No changes added to the commit.
+<<<
