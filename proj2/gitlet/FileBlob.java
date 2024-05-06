@@ -46,8 +46,7 @@ public class FileBlob {
     public static FileBlob fromFilename(String filename) {
         File file = Utils.join(CWD, filename);
         if (!file.exists()) {
-            System.out.println("File does not exist.");
-            throw new RuntimeException();
+            return null;
         }
         byte[] fileContents = Utils.readContents(file);
         return new FileBlob(fileContents);

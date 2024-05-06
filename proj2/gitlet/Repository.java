@@ -47,6 +47,10 @@ public class Repository {
 
     public static void add(String filename) {
         FileBlob blob = FileBlob.fromFilename(filename);
+        if (blob == null) {
+            System.out.println("File does not exist.");
+            return;
+        }
         blob.save();
 
         StagingArea.addFile(filename, blob);
