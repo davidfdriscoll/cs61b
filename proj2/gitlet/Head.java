@@ -8,14 +8,14 @@ import static gitlet.Repository.GITLET_DIR;
 public class Head {
     static final File HEAD_FILE = Utils.join(GITLET_DIR, "HEAD");
 
-    public static String getCommitSha() {
+    public static String getBranchName() {
         if (!HEAD_FILE.exists()) {
             throw new RuntimeException("head file does not exist on attempted read");
         }
         return Utils.readContentsAsString(HEAD_FILE);
     }
 
-    public static void setCommitSha(String commitSha) {
+    public static void setBranchName(String branchName) {
         if (!HEAD_FILE.exists()) {
             try {
                 HEAD_FILE.createNewFile();
@@ -23,6 +23,6 @@ public class Head {
                 throw new RuntimeException(e);
             }
         }
-        Utils.writeContents(HEAD_FILE, commitSha);
+        Utils.writeContents(HEAD_FILE, branchName);
     }
 }

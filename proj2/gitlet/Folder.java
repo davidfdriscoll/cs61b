@@ -41,6 +41,15 @@ public class Folder implements Serializable {
         return Utils.readObject(file, Folder.class);
     }
 
+    public static Folder fromHead() {
+        String branchName = Head.getBranchName();
+        Branch branch = Branch.fromBranchName(branchName);
+        String currentCommitSha = branch.getCommitSha();
+        Commit currentCommit = Commit.fromSha(currentCommitSha);
+        String currentFolderSha = currentCommit.getFolderSha();
+        return Folder.fromSha(currentFolderSha);
+    }
+
     public void saveToSha(String sha) {
         File folderFile = Utils.join(FOLDERS_FOLDER, sha);
         saveToFile(folderFile);
@@ -60,8 +69,11 @@ public class Folder implements Serializable {
     public void addFile(String filename, String fileSha) {
         folder.put(filename, fileSha);
     }
+    public void removeFile(String filename) {
+        folder.remove(filename);
+    }
 
-    public boolean containsFileBlobSha(String filename) {
+    public boolean containsFile(String filename) {
         return folder.containsKey(filename);
     }
 

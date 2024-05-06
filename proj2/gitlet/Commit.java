@@ -75,6 +75,7 @@ public class Commit implements Serializable {
     }
     public String getParentSha() { return parentSha; }
     public String getFolderSha() { return folderSha; }
+    public String getMessage() { return message; }
 
     public static Commit fromSha(String commitSha) {
         File commitFile = Utils.join(COMMITS_FOLDER, commitSha);

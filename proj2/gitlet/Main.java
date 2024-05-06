@@ -12,6 +12,7 @@ public class Main {
         // TODO: what if args is empty?
         String firstArg = args[0];
         String filename;
+        String message;
         switch(firstArg) {
             case "init":
                 validateNumArgs("init", args, 1);
@@ -22,18 +23,32 @@ public class Main {
                 filename = args[1];
                 Repository.add(filename);
                 break;
+            case "rm":
+                validateNumArgs("rm", args, 2);
+                filename = args[1];
+                Repository.rm(filename);
+                break;
             case "commit":
                 if (args.length < 2) {
                     System.out.println("Please enter a commit message.");
                     return;
                 }
                 validateNumArgs("commit", args, 2);
-                String message = args[1];
+                message = args[1];
                 Repository.commit(message);
                 break;
             case "log":
                 validateNumArgs("log", args, 1);
                 Repository.log();
+                break;
+            case "global-log":
+                validateNumArgs("global-log", args, 1);
+                Repository.globalLog();
+                break;
+            case "find":
+                validateNumArgs("global-log", args, 2);
+                message = args[1];
+                Repository.find(message);
                 break;
             case "checkout":
                 String secondArg = args[1];

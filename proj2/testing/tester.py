@@ -358,6 +358,7 @@ def doTest(test):
                 if msg == "OK":
                     if not correctProgramOutput(expected, out, last_groups,
                                                 is_regexp):
+                        print(f"expected ${expected} but was {out}")
                         msg = "incorrect output"
                 if msg != "OK":
                     print("ERROR ({})".format(msg))
