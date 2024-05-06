@@ -1,0 +1,17 @@
+# add different copies of the same file to staging before commit
+> init
+<<<
+* wug.txt
++ wug.txt wug.txt
+> add wug.txt
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "commit notwug as wug.txt"
+<<<
+- wug.txt
+* wug.txt
+> checkout -- wug.txt
+<<<
+= wug.txt notwug.txt

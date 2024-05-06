@@ -1,0 +1,21 @@
+# simple test remove
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "add wug.txt"
+<<<
++ notwug.txt notwug.txt
+> add notwug.txt
+<<<
+> rm wug.txt
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "add notwug.txt"
+<<<
+> checkout -- wug.txt
+<<<
+= wug.txt wug.txt

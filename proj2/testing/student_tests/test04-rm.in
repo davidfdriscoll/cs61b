@@ -1,0 +1,36 @@
+# simple test remove
+> init
+<<<
+> rm missing.txt
+No reason to remove the file.
+<<<
++ wug.txt wug.txt
+> rm wug.txt
+No reason to remove the file.
+<<<
+> add wug.txt
+<<<
+> rm wug.txt
+<<<
+E wug.txt
+> commit "no changes"
+No changes added to the commit.
+<<<
+> add wug.txt
+<<<
+> commit "add wug.txt"
+<<<
+E wug.txt
+- wug.txt
+> checkout -- wug.txt
+<<<
+E wug.txt
+= wug.txt wug.txt
+> rm wug.txt
+<<<
+* wug.txt
+> commit "rm wug.txt"
+<<<
+> checkout -- wug.txt
+File does not exist in that commit.
+<<<
