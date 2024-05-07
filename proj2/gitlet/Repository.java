@@ -17,9 +17,11 @@ import static gitlet.Utils.*;
  */
 public class Repository {
 
+    private static final Boolean useTestDirectory = false;
+
     /** The current working directory. */
     public static final File USER_DIR = new File(System.getProperty("user.dir"));
-    public static final File CWD = USER_DIR; // join(USER_DIR, "mytest");
+    public static final File CWD = useTestDirectory ? join(USER_DIR, "mytest") : USER_DIR;
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
     /** objects folder within .gitlet directory */
@@ -201,6 +203,21 @@ public class Repository {
         newBranch.save();
     }
 
+    public static void removeBranch(String branchName) {
+        String headBranchName = Head.getBranchName();
+        if (Objects.equals(branchName, headBranchName)) {
+            System.out.println("Cannot remove the current branch.");
+            return;
+        }
+
+        Branch branch = Branch.fromBranchName(branchName);
+        if (branch == null) {
+            System.out.println("A branch with that name does not exist.");
+            return;
+        }
+        branch.delete();
+    }
+
     private static boolean hasNoUntrackedFiles() {
         Folder currentFolder = Folder.fromHead();
         StagingArea stagingArea = StagingArea.fromFile();
@@ -215,6 +232,20 @@ public class Repository {
             }
         }
         return true;
+    }
+
+    private static void resetWorkingDirectory(String commitSha) {
+        Commit commit = Commit.fromSha(commitSha);
+        if (commit == null) {
+            return;
+        }
+        String folderSha = commit.getFolderSha();
+        Folder folder = Folder.fromSha(folderSha);
+        folder.writeToWorkingDirectory();
+
+        StagingArea stagingArea = StagingArea.fromFile();
+        stagingArea.clear();
+        stagingArea.save();
     }
 
     public static void checkoutBranch(String branchName) {
@@ -234,15 +265,16 @@ public class Repository {
             return;
         }
         String commitSha = branch.getCommitSha();
-        Commit commit = Commit.fromSha(commitSha);
-        String folderSha = commit.getFolderSha();
-        Folder folder = Folder.fromSha(folderSha);
-        folder.writeToWorkingDirectory();
-
-        StagingArea stagingArea = StagingArea.fromFile();
-        stagingArea.clear();
-        stagingArea.save();
-
         Head.setBranchName(branchName);
+        resetWorkingDirectory(commitSha);
+    }
+
+    public static void reset(String commitSha) {
+        resetWorkingDirectory(commitSha);
+
+        Branch branch = Branch.fromBranchName(Head.getBranchName());
+        assert branch != null;
+        branch.setCommitSha(commitSha);
+        branch.save();
     }
 }

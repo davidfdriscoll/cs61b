@@ -14,6 +14,7 @@ public class Main {
         String filename;
         String message;
         String branchName;
+        String commitSha;
         switch(firstArg) {
             case "init":
                 validateNumArgs("init", args, 1);
@@ -60,6 +61,16 @@ public class Main {
                 branchName = args[1];
                 Repository.branch(branchName);
                 break;
+            case "rm-branch":
+                validateNumArgs("rm-branch", args, 2);
+                branchName = args[1];
+                Repository.removeBranch(branchName);
+                break;
+            case "reset":
+                validateNumArgs("reset", args, 2);
+                commitSha = args[1];
+                Repository.reset(commitSha);
+                break;
             case "checkout":
                 switch(args.length) {
                     // checkout [branch name]
@@ -77,7 +88,7 @@ public class Main {
                     // checkout [commit id] -- [file name]
                     case 4:
                         validateNumArgs("checkout", args, 4);
-                        String commitSha = args[1];
+                        commitSha = args[1];
                         filename = args[3];
                         Repository.checkoutFileFromCommit(commitSha, filename);
                         break;

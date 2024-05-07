@@ -37,6 +37,11 @@ public class Branch {
         Utils.writeContents(branchFile, commitSha);
     }
 
+    public void delete() {
+        File branchFile = Utils.join(HEADS_FOLDER, name);
+        branchFile.delete();
+    }
+
     public void setCommitSha(String commitSha) {
         this.commitSha = commitSha;
     }

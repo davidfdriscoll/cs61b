@@ -1,0 +1,20 @@
+# test remove branch functionality
+> init
+<<<
+> branch other-branch
+<<<
+> checkout other-branch
+<<<
+> checkout master
+<<<
+> rm-branch master
+Cannot remove the current branch.
+<<<
+> rm-branch nonexistent-branch
+A branch with that name does not exist.
+<<<
+> rm-branch other-branch
+<<<
+> checkout other-branch
+No such branch exists.
+<<<
