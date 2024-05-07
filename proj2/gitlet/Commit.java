@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import static gitlet.Repository.OBJECTS_FOLDER;
 
@@ -36,13 +37,12 @@ public class Commit implements Serializable {
     private Long timestamp;
     private String sha;
 
-    /* TODO: fill in the rest of this class. */
     Commit(
-            String message,
-            String folderSha,
-            String parentSha,
-            String mergeParentSha,
-            Long timestamp
+        String message,
+        String folderSha,
+        String parentSha,
+        String mergeParentSha,
+        Long timestamp
     ) {
         this.message = message;
         this.folderSha = folderSha;
@@ -50,12 +50,12 @@ public class Commit implements Serializable {
         this.mergeParentSha = mergeParentSha;
         this.timestamp = timestamp;
         this.sha = Utils.sha1(
-                    message,
-                    folderSha,
-                    parentSha,
-                    mergeParentSha,
-                    timestamp.toString()
-                );
+            message,
+            folderSha,
+            parentSha,
+            mergeParentSha,
+            timestamp.toString()
+        );
     }
 
     public static Commit initialCommit() {
@@ -78,16 +78,46 @@ public class Commit implements Serializable {
     public String getMessage() { return message; }
 
     public static Commit fromSha(String commitSha) {
-        File commitFile = Utils.join(COMMITS_FOLDER, commitSha);
-        if (!commitFile.exists()) {
+        File commitFile = findCommitPath(commitSha);
+        if (commitFile == null || !commitFile.exists()) {
             System.out.println("No commit with that id exists.");
             throw new RuntimeException();
         }
         return Utils.readObject(commitFile, Commit.class);
     }
 
+    private static File findCommitPath(String commitSha) {
+        String prefix = commitSha.substring(0, 2);
+        File prefixFolder = Utils.join(COMMITS_FOLDER, prefix);
+        if (!prefixFolder.exists()) {
+            return null;
+        }
+        if (commitSha.length() > 40) {
+            return null;
+        } else if (commitSha.length() == 40) {
+            return Utils.join(prefixFolder, commitSha);
+        } else {
+            List<String> candidateShas = Utils.plainFilenamesIn(prefixFolder);
+            assert candidateShas != null;
+            for (String candidateSha: candidateShas) {
+                if (candidateSha.startsWith(commitSha))
+                    return Utils.join(prefixFolder, candidateSha);
+            }
+            return null;
+        }
+    }
+
+    private static File createCommitPath(String commitSha) {
+        String prefix = commitSha.substring(0, 2);
+        File prefixFolder = Utils.join(COMMITS_FOLDER, prefix);
+        if (!prefixFolder.exists()) {
+            prefixFolder.mkdir();
+        }
+        return Utils.join(prefixFolder, commitSha);
+    }
+
     public void save() {
-        File commitFile = Utils.join(COMMITS_FOLDER, sha);
+        File commitFile = createCommitPath(sha);
         if (!commitFile.exists()) {
             try {
                 commitFile.createNewFile();
