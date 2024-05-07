@@ -1,0 +1,29 @@
+# basic checkout branch
+> init
+<<<
+> branch other-branch
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "add wug.txt to master"
+<<<
+E wug.txt
+> checkout other-branch
+<<<
+* wug.txt
++ notwug.txt notwug.txt
+> add notwug.txt
+<<<
+> commit "add notwug.txt to other-branch"
+<<<
+E notwug.txt
+* wug.txt
+> checkout master
+<<<
+E wug.txt
+* notwug.txt
+> checkout other-branch
+<<<
+E notwug.txt
+* wug.txt

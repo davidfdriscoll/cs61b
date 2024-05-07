@@ -18,7 +18,8 @@ import static gitlet.Utils.*;
 public class Repository {
 
     /** The current working directory. */
-    public static final File CWD = new File(System.getProperty("user.dir"));
+    public static final File USER_DIR = new File(System.getProperty("user.dir"));
+    public static final File CWD = USER_DIR; // join(USER_DIR, "mytest");
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
     /** objects folder within .gitlet directory */
@@ -146,6 +147,7 @@ public class Repository {
     public static void checkoutFileFromHead(String filename) {
         String branchName = Head.getBranchName();
         Branch branch = Branch.fromBranchName(branchName);
+        assert branch != null;
         checkoutFileFromCommit(branch.getCommitSha(), filename);
     }
 
@@ -160,5 +162,87 @@ public class Repository {
         String fileBlobSha = folder.getFileBlobSha(filename);
         FileBlob fileblob = FileBlob.fromSha(fileBlobSha);
         fileblob.writeToFile(filename);
+    }
+
+    public static void status() {
+        List<String> branchNames = Utils.plainFilenamesIn(HEADS_FOLDER);
+        String currentBranchName = Head.getBranchName();
+
+        System.out.println("=== Branches ===");
+        assert branchNames != null;
+        for (String branchName: branchNames) {
+            if (Objects.equals(branchName, currentBranchName)) {
+                System.out.print("*");
+            }
+            System.out.println(branchName);
+        }
+
+        System.out.println();
+        StagingArea stagingArea = StagingArea.fromFile();
+        stagingArea.print();
+
+        // todo:
+        // === Modifications Not Staged For Commit ===
+        // === Untracked Files ===
+    }
+
+    public static void branch(String branchName) {
+        Branch existingBranch = Branch.fromBranchName(branchName);
+        if (existingBranch != null) {
+            System.out.println("A branch with that name already exists.");
+            return;
+        }
+
+        String headBranchName = Head.getBranchName();
+        Branch headBranch = Branch.fromBranchName(headBranchName);
+        assert headBranch != null;
+        String headBranchSha = headBranch.getCommitSha();
+        Branch newBranch = new Branch(branchName, headBranchSha);
+        newBranch.save();
+    }
+
+    private static boolean hasNoUntrackedFiles() {
+        Folder currentFolder = Folder.fromHead();
+        StagingArea stagingArea = StagingArea.fromFile();
+
+        List<String> filenames = Utils.plainFilenamesIn(CWD);
+        assert filenames != null;
+        for (String filename : filenames) {
+            if(!currentFolder.containsFile(filename) &&
+                    !stagingArea.containsStagedAdd(filename)
+            ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void checkoutBranch(String branchName) {
+        if (!hasNoUntrackedFiles()) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            return;
+        }
+        String currentBranchName = Head.getBranchName();
+        if (currentBranchName.equals(branchName)) {
+            System.out.println("No need to checkout the current branch.");
+            return;
+        }
+
+        Branch branch = Branch.fromBranchName(branchName);
+        if (branch == null) {
+            System.out.println("No such branch exists.");
+            return;
+        }
+        String commitSha = branch.getCommitSha();
+        Commit commit = Commit.fromSha(commitSha);
+        String folderSha = commit.getFolderSha();
+        Folder folder = Folder.fromSha(folderSha);
+        folder.writeToWorkingDirectory();
+
+        StagingArea stagingArea = StagingArea.fromFile();
+        stagingArea.clear();
+        stagingArea.save();
+
+        Head.setBranchName(branchName);
     }
 }

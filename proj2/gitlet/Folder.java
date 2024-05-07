@@ -3,16 +3,18 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import static gitlet.Repository.OBJECTS_FOLDER;
+import static gitlet.Repository.CWD;
 
 public class Folder implements Serializable {
     public static File FOLDERS_FOLDER = Utils.join(OBJECTS_FOLDER, "folders");
 
     // TreeMap<filename, fileblobsha>
-    private TreeMap<String, String> folder;
+    private final TreeMap<String, String> folder;
 
     Folder(TreeMap<String, String> folder) {
         this.folder = folder;
@@ -79,5 +81,22 @@ public class Folder implements Serializable {
 
     public String getFileBlobSha(String filename) {
         return folder.get(filename);
+    }
+
+    public void writeToWorkingDirectory() {
+        List<String> currentFilenames = Utils.plainFilenamesIn(CWD);
+        assert currentFilenames != null;
+        for (String currentFilename: currentFilenames) {
+            if (!containsFile(currentFilename)) {
+                Utils.restrictedDelete(Utils.join(CWD, currentFilename));
+            }
+        }
+
+        for (Map.Entry<String, String> entry : folder.entrySet()) {
+            String filename = entry.getKey();
+            String fileBlobSha = entry.getValue();
+            FileBlob fileBlob = FileBlob.fromSha(fileBlobSha);
+            fileBlob.writeToFile(filename);
+        }
     }
 }

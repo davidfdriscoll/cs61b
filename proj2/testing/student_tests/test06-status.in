@@ -1,0 +1,31 @@
+# status
+> init
+<<<
++ wug.txt wug.txt
++ wug2.txt wug.txt
++ goodbye.txt wug.txt
+> add goodbye.txt
+<<<
+> commit "add goodbye.txt"
+<<<
+> add wug.txt
+<<<
+> add wug2.txt
+<<<
+> rm goodbye.txt
+<<<
+> branch other-branch
+<<<
+> status
+=== Branches ===
+*master
+other-branch
+
+=== Staged Files ===
+wug.txt
+wug2.txt
+
+=== Removed Files ===
+goodbye.txt
+
+<<<

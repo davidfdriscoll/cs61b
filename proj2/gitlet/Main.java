@@ -13,6 +13,7 @@ public class Main {
         String firstArg = args[0];
         String filename;
         String message;
+        String branchName;
         switch(firstArg) {
             case "init":
                 validateNumArgs("init", args, 1);
@@ -50,21 +51,38 @@ public class Main {
                 message = args[1];
                 Repository.find(message);
                 break;
+            case "status":
+                validateNumArgs("status", args, 1);
+                Repository.status();
+                break;
+            case "branch":
+                validateNumArgs("branch", args, 2);
+                branchName = args[1];
+                Repository.branch(branchName);
+                break;
             case "checkout":
-                String secondArg = args[1];
-                switch(secondArg) {
+                switch(args.length) {
+                    // checkout [branch name]
+                    case 2:
+                        validateNumArgs("checkout", args, 2);
+                        branchName = args[1];
+                        Repository.checkoutBranch(branchName);
+                        break;
                     // checkout -- [file name]
-                    case "--":
+                    case 3:
                         validateNumArgs("checkout", args, 3);
                         filename = args[2];
                         Repository.checkoutFileFromHead(filename);
                         break;
                     // checkout [commit id] -- [file name]
-                    default:
+                    case 4:
                         validateNumArgs("checkout", args, 4);
                         String commitSha = args[1];
                         filename = args[3];
                         Repository.checkoutFileFromCommit(commitSha, filename);
+                        break;
+                    default:
+                        System.out.println("Invalid number of arguments to commit");
                         break;
                 }
 

@@ -18,6 +18,9 @@ public class Branch {
 
     public static Branch fromBranchName(String name) {
         File branchFile = Utils.join(HEADS_FOLDER, name);
+        if (!branchFile.exists()) {
+            return null;
+        }
         String commitSha = Utils.readContentsAsString(branchFile);
         return new Branch(name, commitSha);
     }

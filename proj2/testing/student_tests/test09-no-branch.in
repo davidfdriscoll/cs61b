@@ -1,0 +1,9 @@
+# branch doesn't exist or is current branch
+> init
+<<<
+> checkout master
+No need to checkout the current branch.
+<<<
+> checkout other-branch
+No such branch exists.
+<<<

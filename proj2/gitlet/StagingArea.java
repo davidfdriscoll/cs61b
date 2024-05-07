@@ -3,10 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static gitlet.Repository.CWD;
 import static gitlet.Repository.GITLET_DIR;
@@ -82,5 +79,27 @@ public class StagingArea implements Serializable {
             folder.removeFile(filenameToRemove);
         }
         return folder;
+    }
+
+    public void print() {
+        System.out.println("=== Staged Files ===");
+        List<String> sortedAdds = new ArrayList<>(stagedAdds.keySet());
+        Collections.sort(sortedAdds);
+        for (String add : sortedAdds) {
+            System.out.println(add);
+        }
+
+        System.out.println();
+        System.out.println("=== Removed Files ===");
+        List<String> sortedRemoves = new ArrayList<>(stagedRemoves);
+        Collections.sort(sortedRemoves);
+        for (String remove : sortedRemoves) {
+            System.out.println(remove);
+        }
+        System.out.println();
+    }
+
+    public boolean containsStagedAdd(String filename) {
+        return stagedAdds.containsKey(filename);
     }
 }

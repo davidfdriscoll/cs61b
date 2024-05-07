@@ -1,0 +1,8 @@
+# duplicate branch
+> init
+<<<
+> branch other-branch
+<<<
+> branch other-branch
+A branch with that name already exists.
+<<<
