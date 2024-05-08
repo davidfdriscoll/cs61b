@@ -1,0 +1,14 @@
+> init
+<<<
+> branch wug
+<<<
+> branch notwug
+<<<
+> checkout wug
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> merge notwug
+You have uncommitted changes.
+<<<

@@ -71,6 +71,11 @@ public class Main {
                 commitSha = args[1];
                 Repository.reset(commitSha);
                 break;
+            case "merge":
+                validateNumArgs("merge", args, 2);
+                branchName = args[1];
+                Repository.merge(branchName);
+                break;
             case "checkout":
                 switch(args.length) {
                     // checkout [branch name]
@@ -96,11 +101,6 @@ public class Main {
                         System.out.println("Invalid number of arguments to commit");
                         break;
                 }
-
-            // debug methods
-            case "debug":
-                break;
-            // TODO: FILL THE REST IN
         }
     }
 

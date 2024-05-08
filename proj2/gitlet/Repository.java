@@ -1,9 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static gitlet.Branch.HEADS_FOLDER;
 import static gitlet.Commit.COMMITS_FOLDER;
@@ -115,6 +113,7 @@ public class Repository {
     public static void log() {
         String branchName = Head.getBranchName();
         Branch branch = Branch.fromBranchName(branchName);
+        assert branch != null;
         String commitSha = branch.getCommitSha();
 
         while (!Objects.equals(commitSha, "-1")) {
@@ -188,6 +187,15 @@ public class Repository {
         // === Untracked Files ===
     }
 
+    public static Set<String> untrackedFiles() {
+        Folder currentFolder = Folder.fromHead();
+        Set<String> trackedFiles = currentFolder.trackedFiles();
+        List<String> workingDirectoryFiles = Utils.plainFilenamesIn(CWD);
+        assert workingDirectoryFiles != null;
+        Set<String> workingDirectoryFilesSet = new HashSet<>(workingDirectoryFiles);
+        
+    }
+
     public static void branch(String branchName) {
         Branch existingBranch = Branch.fromBranchName(branchName);
         if (existingBranch != null) {
@@ -218,7 +226,7 @@ public class Repository {
         branch.delete();
     }
 
-    private static boolean hasNoUntrackedFiles() {
+    private static boolean hasUntrackedFiles() {
         Folder currentFolder = Folder.fromHead();
         StagingArea stagingArea = StagingArea.fromFile();
 
@@ -228,10 +236,11 @@ public class Repository {
             if(!currentFolder.containsFile(filename) &&
                     !stagingArea.containsStagedAdd(filename)
             ) {
-                return false;
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     private static void resetWorkingDirectory(String commitSha) {
@@ -249,8 +258,7 @@ public class Repository {
     }
 
     public static void checkoutBranch(String branchName) {
-        if (!hasNoUntrackedFiles()) {
-            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+        if (hasUntrackedFiles()) {
             return;
         }
         String currentBranchName = Head.getBranchName();
@@ -276,5 +284,12 @@ public class Repository {
         assert branch != null;
         branch.setCommitSha(commitSha);
         branch.save();
+    }
+
+    public static void merge(String givenBranchName) {
+        if (hasUntrackedFiles()) {
+            System.out.println("You have uncommitted changes.");
+            return;
+        }
     }
 }

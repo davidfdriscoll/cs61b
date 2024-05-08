@@ -1,9 +1,9 @@
-# confirm untracked file prevents checkout branch
+# untracked file does not prevent checkout branch
 > init
 <<<
 > branch other-branch
 <<<
 + wug.txt wug.txt
+# checkout other-branch is ok because other-branch doesn't contain wug.txt
 > checkout other-branch
-There is an untracked file in the way; delete it, or add and commit it first.
 <<<

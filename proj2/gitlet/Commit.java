@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static gitlet.Repository.OBJECTS_FOLDER;
 
@@ -134,6 +135,9 @@ public class Commit implements Serializable {
 
         System.out.println("===");
         System.out.println("commit " + sha);
+        if (!Objects.equals(mergeParentSha, "-1")) {
+            System.out.println("Merge: " + parentSha.substring(0, 7) + " " + mergeParentSha.substring(0, 7));
+        }
         System.out.println("Date: " + simpleDateFormat.format(date));
         System.out.println(message);
         System.out.println();

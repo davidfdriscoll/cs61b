@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import static gitlet.Repository.OBJECTS_FOLDER;
@@ -98,5 +99,9 @@ public class Folder implements Serializable {
             FileBlob fileBlob = FileBlob.fromSha(fileBlobSha);
             fileBlob.writeToFile(filename);
         }
+    }
+
+    public Set<String> trackedFiles() {
+        return folder.keySet();
     }
 }

@@ -1,0 +1,19 @@
+> init
+<<<
+> branch wug
+<<<
+> branch notwug
+<<<
+> checkout wug
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "add wug.txt"
+<<<
+> checkout notwug
+<<<
++ wug.txt notwug.txt
+> checkout wug
+There is an untracked file in the way; delete it, or add and commit it first.
+<<<
