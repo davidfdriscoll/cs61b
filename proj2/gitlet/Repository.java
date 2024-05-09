@@ -232,10 +232,7 @@ public class Repository {
 
     private static boolean hasUntrackedFiles() {
         WorkingDirectory wd = new WorkingDirectory();
-        if (!wd.getUntrackedFiles().isEmpty()) {
-            return true;
-        }
-        return false;
+        return !wd.getUntrackedFiles().isEmpty();
     }
 
     private static void resetWorkingDirectory(String commitSha) {
