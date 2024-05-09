@@ -183,64 +183,21 @@ public class Repository {
         StagingArea stagingArea = StagingArea.fromFile();
         stagingArea.print();
 
+        WorkingDirectory workingDirectory = new WorkingDirectory();
+
         System.out.println("=== Modifications Not Staged For Commit ===");
-        List<String> modifiedFiles = modifiedFiles();
+        List<String> modifiedFiles = workingDirectory.getModificationsNotStagedForCommit();
         for (String file: modifiedFiles) {
             System.out.println(file);
         }
         System.out.println();
 
         System.out.println("=== Untracked Files ===");
-        List<String> untrackedFiles = untrackedFiles();
+        List<String> untrackedFiles = workingDirectory.getUntrackedFiles();
         for (String file: untrackedFiles) {
             System.out.println(file);
         }
         System.out.println();
-    }
-
-    public static List<String> modifiedFiles() {
-        Folder currentFolder = Folder.fromHead();
-        Set<String> trackedFiles = currentFolder.trackedFiles();
-        List<String> workingDirectoryFiles = Utils.plainFilenamesIn(CWD);
-        assert workingDirectoryFiles != null;
-        Set<String> workingDirectoryFilesSet = new HashSet<>(workingDirectoryFiles);
-        List<String> modifiedFiles = new ArrayList<>();
-        StagingArea stagingArea = StagingArea.fromFile();
-
-        for (String trackedFile: trackedFiles) {
-            if (!workingDirectoryFilesSet.contains(trackedFile) &&
-                    !stagingArea.containsStagedRemove(trackedFile)
-            ) {
-                modifiedFiles.add(trackedFile + " (deleted)");
-
-            } else if (workingDirectoryFilesSet.contains(trackedFile)) {
-                String trackedFileSha = currentFolder.getFileBlobSha(trackedFile);
-                FileBlob workingFileBlob = FileBlob.fromFilename(trackedFile);
-                assert workingFileBlob != null;
-                String workingFileSha = workingFileBlob.getSha();
-                if (!Objects.equals(trackedFileSha, workingFileSha)) {
-                    modifiedFiles.add(trackedFile + " (modified)");
-                }
-            }
-        }
-
-        Collections.sort(modifiedFiles);
-        return modifiedFiles;
-    }
-
-    public static List<String> untrackedFiles() {
-        StagingArea stagingArea = StagingArea.fromFile();
-        Folder currentFolder = Folder.fromHead();
-        Set<String> trackedFiles = currentFolder.trackedFiles();
-        List<String> workingDirectoryFiles = Utils.plainFilenamesIn(CWD);
-        assert workingDirectoryFiles != null;
-        Set<String> workingDirectoryFilesSet = new HashSet<>(workingDirectoryFiles);
-        trackedFiles.removeAll(workingDirectoryFilesSet);
-        trackedFiles.removeAll(stagingArea.stagedAdds());
-
-        List<String> sortedUntrackedFiles = new ArrayList<>(trackedFiles);
-        Collections.sort(sortedUntrackedFiles);
-        return sortedUntrackedFiles;
     }
 
     public static void branch(String branchName) {
@@ -274,18 +231,10 @@ public class Repository {
     }
 
     private static boolean hasUntrackedFiles() {
-        Folder currentFolder = Folder.fromHead();
-        StagingArea stagingArea = StagingArea.fromFile();
-
-        List<String> filenames = Utils.plainFilenamesIn(CWD);
-        assert filenames != null;
-        for (String filename : filenames) {
-            if(!currentFolder.containsFile(filename) &&
-                    !stagingArea.containsStagedAdd(filename)
-            ) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                return true;
-            }
+        WorkingDirectory wd = new WorkingDirectory();
+        if (!wd.getUntrackedFiles().isEmpty()) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            return true;
         }
         return false;
     }
@@ -305,9 +254,6 @@ public class Repository {
     }
 
     public static void checkoutBranch(String branchName) {
-        if (hasUntrackedFiles()) {
-            return;
-        }
         String currentBranchName = Head.getBranchName();
         if (currentBranchName.equals(branchName)) {
             System.out.println("No need to checkout the current branch.");
@@ -320,8 +266,8 @@ public class Repository {
             return;
         }
         String commitSha = branch.getCommitSha();
-        Head.setBranchName(branchName);
         resetWorkingDirectory(commitSha);
+        Head.setBranchName(branchName);
     }
 
     public static void reset(String commitSha) {

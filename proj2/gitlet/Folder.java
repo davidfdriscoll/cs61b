@@ -3,10 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 import static gitlet.Repository.OBJECTS_FOLDER;
 import static gitlet.Repository.CWD;
@@ -85,8 +82,14 @@ public class Folder implements Serializable {
     }
 
     public void writeToWorkingDirectory() {
-        List<String> currentFilenames = Utils.plainFilenamesIn(CWD);
-        assert currentFilenames != null;
+        WorkingDirectory wd = new WorkingDirectory();
+        Set<String> untrackedFiles = wd.getUntrackedFilesSet();
+        if (!Collections.disjoint(untrackedFiles, folder.keySet())) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            return;
+        }
+
+        List<String> currentFilenames = wd.getFiles();
         for (String currentFilename: currentFilenames) {
             if (!containsFile(currentFilename)) {
                 Utils.restrictedDelete(Utils.join(CWD, currentFilename));
