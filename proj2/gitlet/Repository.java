@@ -167,10 +167,11 @@ public class Repository {
 
     public static void status() {
         List<String> branchNames = Utils.plainFilenamesIn(HEADS_FOLDER);
+        assert branchNames != null;
+        Collections.sort(branchNames);
         String currentBranchName = Head.getBranchName();
 
         System.out.println("=== Branches ===");
-        assert branchNames != null;
         for (String branchName: branchNames) {
             if (Objects.equals(branchName, currentBranchName)) {
                 System.out.print("*");
@@ -182,18 +183,64 @@ public class Repository {
         StagingArea stagingArea = StagingArea.fromFile();
         stagingArea.print();
 
-        // todo:
-        // === Modifications Not Staged For Commit ===
-        // === Untracked Files ===
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        List<String> modifiedFiles = modifiedFiles();
+        for (String file: modifiedFiles) {
+            System.out.println(file);
+        }
+        System.out.println();
+
+        System.out.println("=== Untracked Files ===");
+        List<String> untrackedFiles = untrackedFiles();
+        for (String file: untrackedFiles) {
+            System.out.println(file);
+        }
+        System.out.println();
     }
 
-    public static Set<String> untrackedFiles() {
+    public static List<String> modifiedFiles() {
         Folder currentFolder = Folder.fromHead();
         Set<String> trackedFiles = currentFolder.trackedFiles();
         List<String> workingDirectoryFiles = Utils.plainFilenamesIn(CWD);
         assert workingDirectoryFiles != null;
         Set<String> workingDirectoryFilesSet = new HashSet<>(workingDirectoryFiles);
-        
+        List<String> modifiedFiles = new ArrayList<>();
+        StagingArea stagingArea = StagingArea.fromFile();
+
+        for (String trackedFile: trackedFiles) {
+            if (!workingDirectoryFilesSet.contains(trackedFile) &&
+                    !stagingArea.containsStagedRemove(trackedFile)
+            ) {
+                modifiedFiles.add(trackedFile + " (deleted)");
+
+            } else if (workingDirectoryFilesSet.contains(trackedFile)) {
+                String trackedFileSha = currentFolder.getFileBlobSha(trackedFile);
+                FileBlob workingFileBlob = FileBlob.fromFilename(trackedFile);
+                assert workingFileBlob != null;
+                String workingFileSha = workingFileBlob.getSha();
+                if (!Objects.equals(trackedFileSha, workingFileSha)) {
+                    modifiedFiles.add(trackedFile + " (modified)");
+                }
+            }
+        }
+
+        Collections.sort(modifiedFiles);
+        return modifiedFiles;
+    }
+
+    public static List<String> untrackedFiles() {
+        StagingArea stagingArea = StagingArea.fromFile();
+        Folder currentFolder = Folder.fromHead();
+        Set<String> trackedFiles = currentFolder.trackedFiles();
+        List<String> workingDirectoryFiles = Utils.plainFilenamesIn(CWD);
+        assert workingDirectoryFiles != null;
+        Set<String> workingDirectoryFilesSet = new HashSet<>(workingDirectoryFiles);
+        trackedFiles.removeAll(workingDirectoryFilesSet);
+        trackedFiles.removeAll(stagingArea.stagedAdds());
+
+        List<String> sortedUntrackedFiles = new ArrayList<>(trackedFiles);
+        Collections.sort(sortedUntrackedFiles);
+        return sortedUntrackedFiles;
     }
 
     public static void branch(String branchName) {

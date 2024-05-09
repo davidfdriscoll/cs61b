@@ -99,7 +99,13 @@ public class StagingArea implements Serializable {
         System.out.println();
     }
 
+    public Set<String> stagedAdds() {
+        return stagedAdds.keySet();
+    }
     public boolean containsStagedAdd(String filename) {
         return stagedAdds.containsKey(filename);
+    }
+    public boolean containsStagedRemove(String filename) {
+        return stagedRemoves.contains(filename);
     }
 }

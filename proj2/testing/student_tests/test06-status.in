@@ -1,12 +1,19 @@
 # status
+# more edge cases here
 > init
 <<<
 + wug.txt wug.txt
 + wug2.txt wug.txt
 + goodbye.txt wug.txt
++ junk.txt wug.txt
++ wug3.txt wug.txt
 > add goodbye.txt
 <<<
-> commit "add goodbye.txt"
+> add junk.txt
+<<<
+> add wug3.txt
+<<<
+> commit "add goodbye junk wug3"
 <<<
 > add wug.txt
 <<<
@@ -14,6 +21,9 @@
 <<<
 > rm goodbye.txt
 <<<
++ wug3.txt notwug.txt
+- junk.txt
++ random.stuff wug.txt
 > branch other-branch
 <<<
 > status
@@ -27,5 +37,12 @@ wug2.txt
 
 === Removed Files ===
 goodbye.txt
+
+=== Modifications Not Staged For Commit ===
+junk.txt (deleted)
+wug3.txt (modified)
+
+=== Untracked Files ===
+random.stuff
 
 <<<
