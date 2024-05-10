@@ -6,9 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static gitlet.Repository.OBJECTS_FOLDER;
 
@@ -141,5 +139,29 @@ public class Commit implements Serializable {
         System.out.println("Date: " + simpleDateFormat.format(date));
         System.out.println(message);
         System.out.println();
+    }
+
+    public static String latestCommonAncestor(Commit left, Commit right) {
+        Set<String> leftAncestry = new HashSet<>();
+        String pointerSha = left.getSha();
+        while (!Objects.equals(pointerSha, "-1")) {
+            leftAncestry.add(pointerSha);
+            pointerSha = Commit.fromSha(pointerSha).getParentSha();
+        }
+        pointerSha = right.getSha();
+        while (!leftAncestry.contains(pointerSha)) {
+            pointerSha = Commit.fromSha(pointerSha).getParentSha();
+        }
+        return pointerSha;
+    }
+
+    public Commit merge(Commit givenCommit) {
+        String lcaSha = latestCommonAncestor(this, );
+        Commit lca = Commit.fromSha(lcaSha);
+
+        Folder currentFolder = Folder.fromSha(folderSha);
+        assert lca != null;
+        Folder lcaFolder = Folder.fromSha(lca.getFolderSha());
+        Folder givenFolder = Folder.fromSha(givenCommit.getFolderSha());
     }
 }

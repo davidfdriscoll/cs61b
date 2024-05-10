@@ -108,4 +108,7 @@ public class StagingArea implements Serializable {
     public boolean containsStagedRemove(String filename) {
         return stagedRemoves.contains(filename);
     }
+    public boolean isEmpty() {
+        return stagedAdds.isEmpty() && stagedRemoves.isEmpty();
+    }
 }

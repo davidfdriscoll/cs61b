@@ -276,9 +276,32 @@ public class Repository {
     }
 
     public static void merge(String givenBranchName) {
-        if (hasUntrackedFiles()) {
+        StagingArea stagingArea = StagingArea.fromFile();
+
+        if (!stagingArea.isEmpty()) {
             System.out.println("You have uncommitted changes.");
             return;
         }
+
+        Branch mergeBranch = Branch.fromBranchName(givenBranchName);
+        if (mergeBranch == null) {
+            System.out.println("A branch with that name does not exist.");
+            return;
+        }
+        String currentBranchName = Head.getBranchName();
+        if (Objects.equals(givenBranchName, currentBranchName)) {
+            System.out.println("Cannot merge a branch with itself.");
+            return;
+        }
+
+        Branch currentBranch = Branch.fromBranchName(currentBranchName);
+        assert currentBranch != null;
+        Commit currentCommit = Commit.fromSha(currentBranch.getCommitSha());
+        Commit mergeCommit = Commit.fromSha(mergeBranch.getCommitSha());
+        assert currentCommit != null;
+
+        Commit newCommit = currentCommit.merge(mergeCommit);
+        currentBranch.setCommitSha(newCommit.getSha());
+        currentBranch.save();
     }
 }

@@ -1,0 +1,7 @@
+> init
+<<<
+> branch other-branch
+<<<
+> merge other-branch
+Current branch fast-forwarded.
+<<<

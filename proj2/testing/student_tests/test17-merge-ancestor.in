@@ -1,0 +1,9 @@
+> init
+<<<
+> branch other-branch
+<<<
+> checkout other-branch
+<<<
+> merge master
+Given branch is an ancestor of the current branch.
+<<<
