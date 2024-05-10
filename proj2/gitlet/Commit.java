@@ -156,12 +156,13 @@ public class Commit implements Serializable {
     }
 
     public Commit merge(Commit givenCommit) {
-        String lcaSha = latestCommonAncestor(this, );
+        String lcaSha = latestCommonAncestor(this, givenCommit);
         Commit lca = Commit.fromSha(lcaSha);
 
         Folder currentFolder = Folder.fromSha(folderSha);
         assert lca != null;
         Folder lcaFolder = Folder.fromSha(lca.getFolderSha());
         Folder givenFolder = Folder.fromSha(givenCommit.getFolderSha());
+        return null;
     }
 }
