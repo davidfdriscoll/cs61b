@@ -104,17 +104,21 @@ public class Branch {
         Set<String> splitPointFiles = lcaFolder.trackedFiles();
 
         Set<String> allFiles = new HashSet<>();
-        allFiles.addAll(currentFiles);
         allFiles.addAll(givenFiles);
         allFiles.addAll(splitPointFiles);
 
-        StagingArea stagingArea = new StagingArea();
+        StagingArea stagingArea = StagingArea.fromFile();
 
         for (String file: allFiles) {
-            // did not exist at split point
-            if (!splitPointFiles.contains(file)) {
-
+            // added to given branch since split and not present in current branch -> add
+            if (givenFiles.contains(file) && !currentFiles.contains(file)) {
+                stagingArea.a
             }
+            // removed from given branch since split and unmodified in current branch -> remove
+            // modified in given branch since split
+                // modified in the same way (have same content or removed) -> do nothing
+                // unmodified in current branch -> replace with given branch version
+                // modified in different ways: concat the two versions
         }
     }
 }
