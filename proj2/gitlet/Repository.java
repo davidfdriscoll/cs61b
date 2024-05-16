@@ -230,44 +230,13 @@ public class Repository {
         branch.delete();
     }
 
-    private static boolean hasUntrackedFiles() {
-        WorkingDirectory wd = new WorkingDirectory();
-        return !wd.getUntrackedFiles().isEmpty();
-    }
-
-    private static void resetWorkingDirectory(String commitSha) {
-        Commit commit = Commit.fromSha(commitSha);
-        if (commit == null) {
-            return;
-        }
-        String folderSha = commit.getFolderSha();
-        Folder folder = Folder.fromSha(folderSha);
-        folder.writeToWorkingDirectory();
-
-        StagingArea stagingArea = StagingArea.fromFile();
-        stagingArea.clear();
-        stagingArea.save();
-    }
 
     public static void checkoutBranch(String branchName) {
-        String currentBranchName = Head.getBranchName();
-        if (currentBranchName.equals(branchName)) {
-            System.out.println("No need to checkout the current branch.");
-            return;
-        }
-
-        Branch branch = Branch.fromBranchName(branchName);
-        if (branch == null) {
-            System.out.println("No such branch exists.");
-            return;
-        }
-        String commitSha = branch.getCommitSha();
-        resetWorkingDirectory(commitSha);
-        Head.setBranchName(branchName);
+        Branch.checkout(branchName);
     }
 
     public static void reset(String commitSha) {
-        resetWorkingDirectory(commitSha);
+        WorkingDirectory.reset(commitSha);
 
         Branch branch = Branch.fromBranchName(Head.getBranchName());
         assert branch != null;
@@ -296,12 +265,6 @@ public class Repository {
 
         Branch currentBranch = Branch.fromBranchName(currentBranchName);
         assert currentBranch != null;
-        Commit currentCommit = Commit.fromSha(currentBranch.getCommitSha());
-        Commit mergeCommit = Commit.fromSha(mergeBranch.getCommitSha());
-        assert currentCommit != null;
-
-        Commit newCommit = currentCommit.merge(mergeCommit);
-        currentBranch.setCommitSha(newCommit.getSha());
-        currentBranch.save();
+        currentBranch.merge(mergeBranch);
     }
 }

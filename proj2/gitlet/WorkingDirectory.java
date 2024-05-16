@@ -74,4 +74,18 @@ public class WorkingDirectory {
     public List<String> getFiles() {
         return files;
     }
+
+    public static void reset(String commitSha) {
+        Commit commit = Commit.fromSha(commitSha);
+        if (commit == null) {
+            return;
+        }
+        String folderSha = commit.getFolderSha();
+        Folder folder = Folder.fromSha(folderSha);
+        folder.writeToWorkingDirectory();
+
+        StagingArea stagingArea = StagingArea.fromFile();
+        stagingArea.clear();
+        stagingArea.save();
+    }
 }

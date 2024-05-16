@@ -2,13 +2,16 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 import static gitlet.Repository.REFS_FOLDER;
 
 public class Branch {
     public static File HEADS_FOLDER = Utils.join(REFS_FOLDER, "heads");
 
-    private String name;
+    private final String name;
     private String commitSha;
 
     public Branch(String name, String commitSha) {
@@ -48,5 +51,70 @@ public class Branch {
 
     public String getCommitSha() {
         return commitSha;
+    }
+
+    public static void checkout(Branch branch) {
+        String currentBranchName = Head.getBranchName();
+        if (currentBranchName.equals(branch.name)) {
+            System.out.println("No need to checkout the current branch.");
+            return;
+        }
+
+        String commitSha = branch.getCommitSha();
+        WorkingDirectory.reset(commitSha);
+        Head.setBranchName(branch.name);
+    }
+
+    public static void checkout(String branchName) {
+        Branch branch = Branch.fromBranchName(branchName);
+        if (branch == null) {
+            System.out.println("No such branch exists.");
+            return;
+        }
+        checkout(branch);
+    }
+
+    public void merge(Branch givenBranch) {
+        Commit currentCommit = Commit.fromSha(getCommitSha());
+        String givenCommitSha = givenBranch.getCommitSha();
+        Commit givenCommit = Commit.fromSha(givenCommitSha);
+        assert currentCommit != null;
+        assert givenCommit != null;
+
+        String lcaSha = Commit.latestCommonAncestor(currentCommit, givenCommit);
+        if (Objects.equals(givenCommitSha, lcaSha)) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            return;
+        }
+        if (Objects.equals(commitSha, lcaSha)) {
+            checkout(givenBranch);
+            System.out.println("Current branch fast-forwarded.");
+            return;
+        }
+
+        Commit lca = Commit.fromSha(lcaSha);
+        assert lca != null;
+
+        Folder currentFolder = Folder.fromSha(currentCommit.getFolderSha());
+        Folder lcaFolder = Folder.fromSha(lca.getFolderSha());
+        Folder givenFolder = Folder.fromSha(givenCommit.getFolderSha());
+
+        Set<String> currentFiles = currentFolder.trackedFiles();
+        Set<String> givenFiles = givenFolder.trackedFiles();
+        Set<String> splitPointFiles = lcaFolder.trackedFiles();
+
+        Set<String> allFiles = new HashSet<>();
+        allFiles.addAll(currentFiles);
+        allFiles.addAll(givenFiles);
+        allFiles.addAll(splitPointFiles);
+
+        StagingArea stagingArea = new StagingArea();
+
+        for (String file: allFiles) {
+            // did not exist at split point
+            if (!splitPointFiles.contains(file)) {
+
+            }
+        }
     }
 }
