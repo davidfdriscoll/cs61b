@@ -6,19 +6,26 @@ import static gitlet.Repository.CWD;
 import static gitlet.Repository.add;
 
 public class WorkingDirectory {
-    private final List<String> files;
+    private final List<String> files = Utils.plainFilenamesIn(CWD);
     private final Set<String> modifiedFiles = new HashSet<>();
     private final Set<String> unmodifiedFiles = new HashSet<>();
     private final Set<String> addedFiles = new HashSet<>();
     private final Set<String> removedFiles = new HashSet<>();
 
     WorkingDirectory() {
-        Folder currentFolder = Folder.fromHead();
         StagingArea stagingArea = StagingArea.fromFile();
+        init(stagingArea);
+    }
+
+    WorkingDirectory(StagingArea stagingArea) {
+        init(stagingArea);
+    }
+
+    private void init(StagingArea stagingArea) {
+        Folder currentFolder = Folder.fromHead();
         Folder updatedFolder = stagingArea.updateFolder(currentFolder);
         Set<String> trackedSet = updatedFolder.trackedFiles();
 
-        files = Utils.plainFilenamesIn(CWD);
         assert files != null;
 
         Set<String> workingSet = new HashSet<>(files);
@@ -75,17 +82,21 @@ public class WorkingDirectory {
         return files;
     }
 
-    public static void reset(String commitSha) {
+    public void reset(Folder folder, StagingArea stagingArea) {
+        folder.writeToWorkingDirectory(this);
+
+        stagingArea.clear();
+        stagingArea.save();
+    }
+
+    public void reset(String commitSha) {
         Commit commit = Commit.fromSha(commitSha);
         if (commit == null) {
             return;
         }
         String folderSha = commit.getFolderSha();
         Folder folder = Folder.fromSha(folderSha);
-        folder.writeToWorkingDirectory();
-
         StagingArea stagingArea = StagingArea.fromFile();
-        stagingArea.clear();
-        stagingArea.save();
+        reset(folder, stagingArea);
     }
 }

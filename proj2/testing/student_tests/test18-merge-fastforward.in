@@ -2,6 +2,16 @@
 <<<
 > branch other-branch
 <<<
+> checkout other-branch
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "add wug.txt"
+<<<
+> checkout master
+<<<
 > merge other-branch
 Current branch fast-forwarded.
 <<<
+= wug.txt wug.txt

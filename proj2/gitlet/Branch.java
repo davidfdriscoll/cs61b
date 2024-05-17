@@ -63,7 +63,7 @@ public class Branch {
         }
 
         String commitSha = branch.getCommitSha();
-        WorkingDirectory.reset(commitSha);
+        new WorkingDirectory().reset(commitSha);
         Head.setBranchName(branch.name);
     }
 
@@ -76,7 +76,7 @@ public class Branch {
         checkout(branch);
     }
 
-    public void merge(Branch givenBranch) {
+    public void merge(Branch givenBranch, StagingArea stagingArea) {
         Commit currentCommit = Commit.fromSha(getCommitSha());
         String givenCommitSha = givenBranch.getCommitSha();
         Commit givenCommit = Commit.fromSha(givenCommitSha);
@@ -89,7 +89,9 @@ public class Branch {
             return;
         }
         if (Objects.equals(commitSha, lcaSha)) {
-            checkout(givenBranch);
+            new WorkingDirectory().reset(givenCommitSha);
+            setCommitSha(givenCommitSha);
+            save();
             System.out.println("Current branch fast-forwarded.");
             return;
         }
@@ -109,31 +111,30 @@ public class Branch {
         allFiles.addAll(givenFiles);
         allFiles.addAll(splitPointFiles);
 
-        StagingArea stagingArea = StagingArea.fromFile();
-
         for (String file: allFiles) {
             String givenFileSha = givenFolder.getFileBlobSha(file);
             String lcaFileSha = lcaFolder.getFileBlobSha(file);
             String currentFileSha = currentFolder.getFileBlobSha(file);
 
+            boolean added = !lcaFolder.containsFile(file) &&
+                                givenFiles.contains(file) &&
+                                !currentFiles.contains(file);
+            boolean removed = lcaFolder.containsFile(file) &&
+                                !givenFiles.contains(file) &&
+                                Objects.equals(lcaFileSha, currentFileSha);
+            boolean inConflict = !Objects.equals(currentFileSha, givenFileSha);
+
             // added to given branch since split and not present in current branch -> add
-            if (!lcaFolder.containsFile(file) &&
-                    givenFiles.contains(file) &&
-                    !currentFiles.contains(file)
-            ) {
+            if (added) {
                 FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
                 stagingArea.addFile(file, fileBlob, currentFolder);
             }
             // removed from given branch since split and unmodified in current branch -> remove
-            else if (lcaFolder.containsFile(file) &&
-                    !givenFiles.contains(file) &&
-                    Objects.equals(lcaFileSha, currentFileSha)) {
+            else if (removed) {
                 stagingArea.removeFile(file, currentFolder);
             }
             // modified in given branch since split
-            else if (lcaFolder.containsFile(file) &&
-                    givenFolder.containsFile(file) &&
-                    !Objects.equals(lcaFileSha, givenFileSha)) {
+            else if (inConflict) {
                 // modified in the same way (have same content or removed) -> do nothing
                 if (currentFolder.containsFile(file) &&
                         Objects.equals(givenFileSha, currentFileSha)) {}
@@ -149,6 +150,7 @@ public class Branch {
                     String mergeString = "<<<<<<< HEAD\n" + currentFileString + "=======\n" + givenFileString + ">>>>>>>\n";
                     FileBlob mergeFileBlob = new FileBlob(mergeString.getBytes(StandardCharsets.UTF_8));
                     stagingArea.addFile(file, mergeFileBlob, currentFolder);
+                    mergeFileBlob.save();
                 }
             }
         }
@@ -156,6 +158,7 @@ public class Branch {
         Folder newFolder = stagingArea.updateFolder(currentFolder);
         String newFolderSha = newFolder.generateSha();
         newFolder.saveToSha(newFolderSha);
+        new WorkingDirectory(stagingArea).reset(newFolder, stagingArea);
 
         Long timestamp = new Date().getTime();
         Commit newCommit = new Commit(
@@ -166,9 +169,6 @@ public class Branch {
                 timestamp
         );
         newCommit.save();
-
-        stagingArea.clear();
-        stagingArea.save();
 
         setCommitSha(newCommit.getSha());
         save();
