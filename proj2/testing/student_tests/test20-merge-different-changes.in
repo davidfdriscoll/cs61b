@@ -1,0 +1,24 @@
+> init
+<<<
+> branch wug
+<<<
+> branch notwug
+<<<
+> checkout wug
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "wug as wug"
+<<<
+> checkout notwug
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "notwug as wug"
+<<<
+= wug.txt notwug.txt
+> merge wug
+<<<
+= wug.txt mergeconflict-wug-into-notwug.txt

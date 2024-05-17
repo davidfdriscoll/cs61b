@@ -1,0 +1,24 @@
+> init
+<<<
+> branch this-branch
+<<<
+> branch other-branch
+<<<
+> checkout other-branch
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "add wug.txt"
+<<<
+> checkout this-branch
+<<<
++ notwug.txt notwug.txt
+> add notwug.txt
+<<<
+> commit "add notwug.txt"
+<<<
+> merge other-branch
+<<<
+= notwug.txt notwug.txt
+= wug.txt wug.txt
