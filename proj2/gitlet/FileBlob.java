@@ -18,6 +18,8 @@ public class FileBlob {
         this.sha = Utils.sha1(contents);
     }
 
+    public byte[] getContents() { return contents; }
+    public String getContentAsString() { return new String(contents, StandardCharsets.UTF_8); }
     public String getSha() {
         return sha;
     }

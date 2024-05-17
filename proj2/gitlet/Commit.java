@@ -91,9 +91,9 @@ public class Commit implements Serializable {
         if (!prefixFolder.exists()) {
             return null;
         }
-        if (commitSha.length() > 40) {
+        if (commitSha.length() > Utils.UID_LENGTH) {
             return null;
-        } else if (commitSha.length() == 40) {
+        } else if (commitSha.length() == Utils.UID_LENGTH) {
             return Utils.join(prefixFolder, commitSha);
         } else {
             List<String> candidateShas = Utils.plainFilenamesIn(prefixFolder);

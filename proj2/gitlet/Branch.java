@@ -2,6 +2,8 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -110,15 +112,65 @@ public class Branch {
         StagingArea stagingArea = StagingArea.fromFile();
 
         for (String file: allFiles) {
+            String givenFileSha = givenFolder.getFileBlobSha(file);
+            String lcaFileSha = lcaFolder.getFileBlobSha(file);
+            String currentFileSha = currentFolder.getFileBlobSha(file);
+
             // added to given branch since split and not present in current branch -> add
-            if (givenFiles.contains(file) && !currentFiles.contains(file)) {
-                stagingArea.a
+            if (!lcaFolder.containsFile(file) &&
+                    givenFiles.contains(file) &&
+                    !currentFiles.contains(file)
+            ) {
+                FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
+                stagingArea.addFile(file, fileBlob, currentFolder);
             }
             // removed from given branch since split and unmodified in current branch -> remove
+            else if (lcaFolder.containsFile(file) &&
+                    !givenFiles.contains(file) &&
+                    Objects.equals(lcaFileSha, currentFileSha)) {
+                stagingArea.removeFile(file, currentFolder);
+            }
             // modified in given branch since split
+            else if (lcaFolder.containsFile(file) &&
+                    givenFolder.containsFile(file) &&
+                    !Objects.equals(lcaFileSha, givenFileSha)) {
                 // modified in the same way (have same content or removed) -> do nothing
+                if (currentFolder.containsFile(file) &&
+                        Objects.equals(givenFileSha, currentFileSha)) {}
                 // unmodified in current branch -> replace with given branch version
+                else if (currentFolder.containsFile(file) && Objects.equals(currentFileSha, lcaFileSha)) {
+                    FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
+                    stagingArea.addFile(file, fileBlob, currentFolder);
+                }
                 // modified in different ways: concat the two versions
+                else {
+                    String currentFileString = FileBlob.fromSha(currentFileSha).getContentAsString();
+                    String givenFileString = FileBlob.fromSha(givenFileSha).getContentAsString();
+                    String mergeString = "<<<<<<< HEAD\n" + currentFileString + "=======\n" + givenFileString + ">>>>>>>\n";
+                    FileBlob mergeFileBlob = new FileBlob(mergeString.getBytes(StandardCharsets.UTF_8));
+                    stagingArea.addFile(file, mergeFileBlob, currentFolder);
+                }
+            }
         }
+
+        Folder newFolder = stagingArea.updateFolder(currentFolder);
+        String newFolderSha = newFolder.generateSha();
+        newFolder.saveToSha(newFolderSha);
+
+        Long timestamp = new Date().getTime();
+        Commit newCommit = new Commit(
+                "Merged " + givenBranch.name + " into " + name + ".",
+                newFolderSha,
+                currentCommit.getSha(),
+                givenCommit.getSha(),
+                timestamp
+        );
+        newCommit.save();
+
+        stagingArea.clear();
+        stagingArea.save();
+
+        setCommitSha(newCommit.getSha());
+        save();
     }
 }
