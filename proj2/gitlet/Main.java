@@ -92,12 +92,20 @@ public class Main {
                     // checkout -- [file name]
                     case 3:
                         validateNumArgs("checkout", args, 3);
+                        if (!Objects.equals(args[1], "--")) {
+                            System.out.println("Incorrect operands.");
+                            break;
+                        }
                         filename = args[2];
                         Repository.checkoutFileFromHead(filename);
                         break;
                     // checkout [commit id] -- [file name]
                     case 4:
                         validateNumArgs("checkout", args, 4);
+                        if (!Objects.equals(args[2], "--")) {
+                            System.out.println("Incorrect operands.");
+                            break;
+                        }
                         commitSha = args[1];
                         filename = args[3];
                         Repository.checkoutFileFromCommit(commitSha, filename);
@@ -106,6 +114,7 @@ public class Main {
                         System.out.println("Invalid number of arguments to commit");
                         break;
                 }
+                break;
             default:
                 System.out.println("No command with that name exists.");
                 break;
