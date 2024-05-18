@@ -135,13 +135,18 @@ public class Repository {
 
     public static void find(String commitMessage) {
         List<String> commitShas = Commit.findAllCommitShas();
+        boolean hasFoundCommit = false;
 
         for (String commitSha: commitShas) {
             Commit commit = Commit.fromSha(commitSha);
             assert commit != null;
             if (Objects.equals(commit.getMessage(), commitMessage)) {
                 System.out.println(commitSha);
+                hasFoundCommit = true;
             }
+        }
+        if (!hasFoundCommit) {
+            System.out.println("Found no commit with that message.");
         }
     }
 
