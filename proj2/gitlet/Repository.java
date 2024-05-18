@@ -124,21 +124,21 @@ public class Repository {
     }
 
     public static void globalLog() {
-        List<String> commitShas = Utils.plainFilenamesIn(COMMITS_FOLDER);
+        List<String> commitShas = Commit.findAllCommitShas();
 
-        assert commitShas != null;
         for (String commitSha: commitShas) {
             Commit commit = Commit.fromSha(commitSha);
+            assert commit != null;
             commit.print();
         }
     }
 
     public static void find(String commitMessage) {
-        List<String> commitShas = Utils.plainFilenamesIn(COMMITS_FOLDER);
+        List<String> commitShas = Commit.findAllCommitShas();
 
-        assert commitShas != null;
         for (String commitSha: commitShas) {
             Commit commit = Commit.fromSha(commitSha);
+            assert commit != null;
             if (Objects.equals(commit.getMessage(), commitMessage)) {
                 System.out.println(commitSha);
             }
@@ -154,6 +154,10 @@ public class Repository {
 
     public static void checkoutFileFromCommit(String commitSha, String filename) {
         Commit commit = Commit.fromSha(commitSha);
+        if (commit == null) {
+            return;
+        }
+
         String folderSha = commit.getFolderSha();
         Folder folder = Folder.fromSha(folderSha);
         if (!folder.containsFile(filename)) {

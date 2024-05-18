@@ -115,6 +115,19 @@ public class Commit implements Serializable {
         return Utils.join(prefixFolder, commitSha);
     }
 
+    public static List<String> findAllCommitShas() {
+        String[] prefixes = COMMITS_FOLDER.list();
+        List<String> commitShas = new ArrayList<>();
+        assert prefixes != null;
+        for (String prefix: prefixes) {
+            File prefixFolder = Utils.join(COMMITS_FOLDER, prefix);
+            List<String> prefixedFiles = Utils.plainFilenamesIn(prefixFolder);
+            assert prefixedFiles != null;
+            commitShas.addAll(prefixedFiles);
+        }
+        return commitShas;
+    }
+
     public void save() {
         File commitFile = createCommitPath(sha);
         if (!commitFile.exists()) {

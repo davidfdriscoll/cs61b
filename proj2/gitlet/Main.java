@@ -1,5 +1,7 @@
 package gitlet;
 
+import java.util.Objects;
+
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author TODO
  */
@@ -9,7 +11,10 @@ public class Main {
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
     public static void main(String[] args) {
-        // TODO: what if args is empty?
+        if (args.length == 0) {
+            System.out.println("Please enter a command.");
+            return;
+        }
         String firstArg = args[0];
         String filename;
         String message;
@@ -31,7 +36,7 @@ public class Main {
                 Repository.rm(filename);
                 break;
             case "commit":
-                if (args.length < 2) {
+                if (args.length != 2 || Objects.equals(args[1], "")) {
                     System.out.println("Please enter a commit message.");
                     return;
                 }
@@ -101,6 +106,9 @@ public class Main {
                         System.out.println("Invalid number of arguments to commit");
                         break;
                 }
+            default:
+                System.out.println("No command with that name exists.");
+                break;
         }
     }
 
