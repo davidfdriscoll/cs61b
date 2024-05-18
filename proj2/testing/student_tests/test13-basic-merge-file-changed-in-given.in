@@ -20,5 +20,6 @@
 <<<
 = wug.txt wug.txt
 > merge notwug
+Current branch fast-forwarded
 <<<
 = wug.txt notwug.txt

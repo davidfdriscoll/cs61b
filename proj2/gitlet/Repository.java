@@ -240,7 +240,7 @@ public class Repository {
     }
 
     public static void reset(String commitSha) {
-        WorkingDirectory.reset(commitSha);
+        new WorkingDirectory().reset(commitSha);
 
         Branch branch = Branch.fromBranchName(Head.getBranchName());
         assert branch != null;
@@ -269,6 +269,6 @@ public class Repository {
 
         Branch currentBranch = Branch.fromBranchName(currentBranchName);
         assert currentBranch != null;
-        currentBranch.merge(mergeBranch);
+        currentBranch.merge(mergeBranch, stagingArea);
     }
 }

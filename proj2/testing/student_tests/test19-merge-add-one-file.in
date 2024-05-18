@@ -1,5 +1,7 @@
 > init
 <<<
+> branch this-branch
+<<<
 > branch other-branch
 <<<
 > checkout other-branch
@@ -9,9 +11,14 @@
 <<<
 > commit "add wug.txt"
 <<<
-> checkout master
+> checkout this-branch
+<<<
++ notwug.txt notwug.txt
+> add notwug.txt
+<<<
+> commit "add notwug.txt"
 <<<
 > merge other-branch
-Current branch fast-forwarded.
 <<<
+= notwug.txt notwug.txt
 = wug.txt wug.txt
