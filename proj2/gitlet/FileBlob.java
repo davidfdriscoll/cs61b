@@ -41,6 +41,11 @@ public class FileBlob {
     }
 
     public static FileBlob fromSha(String sha) {
+        try {
+            Utils.join(FILEBLOBS_FOLDER, sha);
+        } catch(NullPointerException e) {
+            return null;
+        }
         File fileblobFile = Utils.join(FILEBLOBS_FOLDER, sha);
         return new FileBlob(Utils.readContents(fileblobFile));
     }
