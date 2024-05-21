@@ -81,7 +81,7 @@ public class Commit implements Serializable {
         File commitFile = findCommitPath(commitSha);
         if (commitFile == null || !commitFile.exists()) {
             System.out.println("No commit with that id exists.");
-            return null;
+            throw new RuntimeException();
         }
         return Utils.readObject(commitFile, Commit.class);
     }

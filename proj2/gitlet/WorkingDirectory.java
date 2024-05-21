@@ -91,9 +91,6 @@ public class WorkingDirectory {
 
     public void reset(String commitSha) {
         Commit commit = Commit.fromSha(commitSha);
-        if (commit == null) {
-            return;
-        }
         String folderSha = commit.getFolderSha();
         Folder folder = Folder.fromSha(folderSha);
         StagingArea stagingArea = StagingArea.fromFile();
