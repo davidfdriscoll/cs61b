@@ -15,6 +15,14 @@ public class Main {
             System.out.println("Please enter a command.");
             return;
         }
+        try {
+            runCommands(args);
+        } catch(Exception e) {
+            return;
+        }
+    }
+
+    public static void runCommands(String[] args) {
         String firstArg = args[0];
         String filename;
         String message;

@@ -1,6 +1,20 @@
 # status
 # more edge cases here
+I definitions.inc
 > init
+<<<
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
 <<<
 + wug.txt wug.txt
 + wug2.txt wug.txt
