@@ -88,8 +88,10 @@ public class Repository {
     public static void commit(String message) {
         String branchName = Head.getBranchName();
         Branch branch = Branch.fromBranchName(branchName);
+        assert branch != null;
         String currentCommitSha = branch.getCommitSha();
         Commit currentCommit = Commit.fromSha(currentCommitSha);
+        assert currentCommit != null;
         String currentFolderSha = currentCommit.getFolderSha();
         Folder currentFolder = Folder.fromSha(currentFolderSha);
 
@@ -176,6 +178,7 @@ public class Repository {
         }
         String fileBlobSha = folder.getFileBlobSha(filename);
         FileBlob fileblob = FileBlob.fromSha(fileBlobSha);
+        assert fileblob != null;
         fileblob.writeToFile(filename);
     }
 
