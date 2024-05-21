@@ -20,5 +20,6 @@
 <<<
 = wug.txt notwug.txt
 > merge wug
+Encountered a merge conflict.
 <<<
 = wug.txt mergeconflict-wug-into-notwug.txt

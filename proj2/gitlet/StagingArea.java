@@ -60,9 +60,7 @@ public class StagingArea implements Serializable {
             System.out.println("No reason to remove the file.");
             return;
         }
-        if (stagedAdds.containsKey(filename)) {
-            stagedAdds.remove(filename);
-        }
+        stagedAdds.remove(filename);
         if (currentFolder.containsFile(filename)) {
             stagedRemoves.add(filename);
         }

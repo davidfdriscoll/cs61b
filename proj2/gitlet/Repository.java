@@ -75,11 +75,14 @@ public class Repository {
     public static void rm(String filename) {
         Folder currentFolder = Folder.fromHead();
 
+        if (currentFolder.containsFile(filename)) {
+            File workingDirectoryFile = Utils.join(CWD, filename);
+            Utils.restrictedDelete(workingDirectoryFile);
+        }
+
         StagingArea stagingArea = StagingArea.fromFile();
         stagingArea.removeFile(filename, currentFolder);
         stagingArea.save();
-        File workingDirectoryFile = Utils.join(CWD, filename);
-        Utils.restrictedDelete(workingDirectoryFile);
     }
 
     public static void commit(String message) {

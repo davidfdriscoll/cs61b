@@ -73,6 +73,7 @@ public class Commit implements Serializable {
         return sha;
     }
     public String getParentSha() { return parentSha; }
+    public String getMergeParentSha() { return mergeParentSha; }
     public String getFolderSha() { return folderSha; }
     public String getMessage() { return message; }
 
@@ -156,15 +157,43 @@ public class Commit implements Serializable {
 
     public static String latestCommonAncestor(Commit left, Commit right) {
         Set<String> leftAncestry = new HashSet<>();
-        String pointerSha = left.getSha();
-        while (!Objects.equals(pointerSha, "-1")) {
-            leftAncestry.add(pointerSha);
-            pointerSha = Commit.fromSha(pointerSha).getParentSha();
+
+        Deque<String> queue = new ArrayDeque<>();
+        String sha = left.getSha();
+        if (!Objects.equals(sha, "-1")) {
+            queue.add(sha);
         }
-        pointerSha = right.getSha();
-        while (!leftAncestry.contains(pointerSha)) {
-            pointerSha = Commit.fromSha(pointerSha).getParentSha();
+        while (!queue.isEmpty()) {
+            sha = queue.removeFirst();
+            leftAncestry.add(sha);
+            Commit commit = Commit.fromSha(sha);
+            assert commit != null;
+            if (!Objects.equals(commit.getParentSha(), "-1")) {
+                queue.add(commit.getParentSha());
+            }
+            if (!Objects.equals(commit.getMergeParentSha(), "-1")) {
+                queue.add(commit.getMergeParentSha());
+            }
         }
-        return pointerSha;
+
+        sha = right.getSha();
+        if (!Objects.equals(sha, "-1")) {
+            queue.add(sha);
+        }
+        while (!queue.isEmpty()) {
+            sha = queue.removeFirst();
+            if (leftAncestry.contains(sha)) {
+                return sha;
+            }
+            Commit commit = Commit.fromSha(sha);
+            assert commit != null;
+            if (!Objects.equals(commit.getParentSha(), "-1")) {
+                queue.add(commit.getParentSha());
+            }
+            if (!Objects.equals(commit.getMergeParentSha(), "-1")) {
+                queue.add(commit.getMergeParentSha());
+            }
+        }
+        return null;
     }
 }
