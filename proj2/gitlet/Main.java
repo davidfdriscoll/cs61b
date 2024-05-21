@@ -2,6 +2,8 @@ package gitlet;
 
 import java.util.Objects;
 
+import static gitlet.Repository.GITLET_DIR;
+
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author TODO
  */
@@ -28,6 +30,10 @@ public class Main {
         String message;
         String branchName;
         String commitSha;
+        if (!Objects.equals(firstArg, "init") && !GITLET_DIR.exists()) {
+            System.out.println("Not in an initialized Gitlet directory.");
+            throw new RuntimeException();
+        }
         switch(firstArg) {
             case "init":
                 validateNumArgs("init", args, 1);
