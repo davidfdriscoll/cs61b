@@ -99,6 +99,7 @@ public class Folder implements Serializable {
             String filename = entry.getKey();
             String fileBlobSha = entry.getValue();
             FileBlob fileBlob = FileBlob.fromSha(fileBlobSha);
+            assert fileBlob != null;
             fileBlob.writeToFile(filename);
         }
     }

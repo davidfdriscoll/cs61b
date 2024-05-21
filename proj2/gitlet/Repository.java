@@ -78,6 +78,8 @@ public class Repository {
         StagingArea stagingArea = StagingArea.fromFile();
         stagingArea.removeFile(filename, currentFolder);
         stagingArea.save();
+        File workingDirectoryFile = Utils.join(CWD, filename);
+        Utils.restrictedDelete(workingDirectoryFile);
     }
 
     public static void commit(String message) {

@@ -53,7 +53,6 @@ public class StagingArea implements Serializable {
         } else {
             stagedAdds.put(filename, fileBlob.getSha());
         }
-        Utils.writeObject(STAGING_AREA_FILE, stagedAdds);
     }
 
     public void removeFile(String filename, Folder currentFolder) {
@@ -66,8 +65,6 @@ public class StagingArea implements Serializable {
         }
         if (currentFolder.containsFile(filename)) {
             stagedRemoves.add(filename);
-            File workingDirectoryFile = Utils.join(CWD, filename);
-            Utils.restrictedDelete(workingDirectoryFile);
         }
     }
 
@@ -99,15 +96,6 @@ public class StagingArea implements Serializable {
         System.out.println();
     }
 
-    public Set<String> stagedAdds() {
-        return stagedAdds.keySet();
-    }
-    public boolean containsStagedAdd(String filename) {
-        return stagedAdds.containsKey(filename);
-    }
-    public boolean containsStagedRemove(String filename) {
-        return stagedRemoves.contains(filename);
-    }
     public boolean isEmpty() {
         return stagedAdds.isEmpty() && stagedRemoves.isEmpty();
     }
