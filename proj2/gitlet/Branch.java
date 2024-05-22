@@ -138,8 +138,7 @@ public class Branch {
             // modified in given branch since split
             else if (modified) {
                 // modified in the same way (have same content or removed) -> do nothing
-                if (currentFolder.containsFile(file) &&
-                        Objects.equals(givenFileSha, currentFileSha)) {}
+                if (Objects.equals(givenFileSha, currentFileSha)) {}
                 // unmodified in current branch -> replace with given branch version
                 else if (currentFolder.containsFile(file) && Objects.equals(currentFileSha, lcaFileSha)) {
                     FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
