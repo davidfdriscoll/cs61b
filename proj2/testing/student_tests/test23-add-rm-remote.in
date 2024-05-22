@@ -1,0 +1,15 @@
+> init
+<<<
+> rm-remote other
+A remote with that name does not exist.
+<<<
+> add-remote other ../testing/otherdir/.gitlet
+<<<
+> add-remote other ../testing/otherdir/.gitlet
+A remote with that name already exists.
+<<<
+> rm-remote other
+<<<
+> rm-remote other
+A remote with that name does not exist.
+<<<

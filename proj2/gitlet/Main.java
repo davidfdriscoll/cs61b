@@ -29,6 +29,7 @@ public class Main {
         String filename;
         String message;
         String branchName;
+        String remoteName;
         String commitSha;
         if (!Objects.equals(firstArg, "init") && !GITLET_DIR.exists()) {
             System.out.println("Not in an initialized Gitlet directory.");
@@ -84,6 +85,17 @@ public class Main {
                 validateNumArgs("rm-branch", args, 2);
                 branchName = args[1];
                 Repository.removeBranch(branchName);
+                break;
+            case "add-remote":
+                validateNumArgs("add-remote", args, 3);
+                remoteName = args[1];
+                String remotePath = args[2];
+                Repository.addRemote(remoteName, remotePath);
+                break;
+            case "rm-remote":
+                validateNumArgs("rm-remote", args, 2);
+                remoteName = args[1];
+                Repository.removeRemote(remoteName);
                 break;
             case "reset":
                 validateNumArgs("reset", args, 2);

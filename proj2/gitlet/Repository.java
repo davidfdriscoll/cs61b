@@ -22,6 +22,7 @@ public class Repository {
     public static final File COMMITS_FOLDER = join(OBJECTS_FOLDER, "commits");
     public static final File REFS_FOLDER = Utils.join(GITLET_DIR, "refs");
     public static final File HEADS_FOLDER = join(REFS_FOLDER, "heads");
+    public static final File REMOTES_FOLDER = join(REFS_FOLDER, "remotes");
 
 
     public static void init() {
@@ -39,6 +40,7 @@ public class Repository {
         FOLDERS_FOLDER.mkdir();
         REFS_FOLDER.mkdir();
         HEADS_FOLDER.mkdir();
+        REMOTES_FOLDER.mkdir();
 
         Folder emptyFolder = Folder.emptyFolder();
         String emptyFolderSha = emptyFolder.generateSha();
@@ -245,6 +247,26 @@ public class Repository {
             return;
         }
         branch.delete();
+    }
+
+    public static void addRemote(String remoteName, String remotePath) {
+        Remote existingRemote = Remote.fromRemoteName(remoteName);
+        if (existingRemote != null) {
+            System.out.println("A remote with that name already exists.");
+            throw new RuntimeException();
+        }
+
+        Remote newRemote = new Remote(remoteName, remotePath);
+        newRemote.save();
+    }
+
+    public static void removeRemote(String remoteName) {
+        Remote remote = Remote.fromRemoteName(remoteName);
+        if (remote == null) {
+            System.out.println("A remote with that name does not exist.");
+            throw new RuntimeException();
+        }
+        remote.delete();
     }
 
 
