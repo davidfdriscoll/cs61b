@@ -78,69 +78,12 @@ public class Branch {
         System.out.println("Current branch fast-forwarded.");
     }
 
-    private StagingArea createMergeStagingArea(
-        Folder givenFolder,
-        Folder lcaFolder,
-        Folder currentFolder
-    ) {
-        Set<String> currentFiles = currentFolder.trackedFiles();
-        Set<String> givenFiles = givenFolder.trackedFiles();
-        Set<String> splitPointFiles = lcaFolder.trackedFiles();
-
-        Set<String> allFiles = new HashSet<>();
-        allFiles.addAll(givenFiles);
-        allFiles.addAll(splitPointFiles);
-
-        StagingArea stagingArea = new StagingArea();
-        boolean encounteredMergeConflict = false;
-
-        for (String file: allFiles) {
-            String givenFileSha = givenFolder.getFileBlobSha(file);
-            String lcaFileSha = lcaFolder.getFileBlobSha(file);
-            String currentFileSha = currentFolder.getFileBlobSha(file);
-
-            boolean added = !lcaFolder.containsFile(file)
-                && givenFiles.contains(file)
-                && !currentFiles.contains(file);
-            boolean removed = lcaFolder.containsFile(file)
-                && !givenFiles.contains(file)
-                && Objects.equals(lcaFileSha, currentFileSha);
-            boolean modified = !Objects.equals(lcaFileSha, givenFileSha);
-
-            // added to given branch since split and not present in current branch -> add
-            if (added) {
-                FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
-                stagingArea.addFile(file, fileBlob, currentFolder);
-                // removed from given branch since split and unmodified in current branch -> remove
-            } else if (removed) {
-                stagingArea.removeFile(file, currentFolder);
-                // modified in given branch since split
-            } else if (modified) {
-                // unmodified in current branch -> replace with given branch version
-                if (currentFolder.containsFile(file)
-                        && Objects.equals(currentFileSha, lcaFileSha)
-                ) {
-                    FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
-                    stagingArea.addFile(file, fileBlob, currentFolder);
-                    // modified in different ways: concat the two versions
-                } else if (!Objects.equals(givenFileSha, currentFileSha)) {
-                    encounteredMergeConflict = true;
-                    FileBlob mergeFileBlob =
-                        FileBlob.mergeConflictFileBlob(currentFileSha, givenFileSha);
-                    stagingArea.addFile(file, mergeFileBlob, currentFolder);
-                    mergeFileBlob.save();
-                }
-            }
-        }
-
-        if (encounteredMergeConflict) {
-            System.out.println("Encountered a merge conflict.");
-        }
-
-        return stagingArea;
-    }
-
     public void merge(Branch givenBranch) {
+        if (Objects.equals(givenBranch.name, name)) {
+            System.out.println("Cannot merge a branch with itself.");
+            return;
+        }
+
         Commit currentCommit = Commit.fromSha(getCommitSha());
         String givenCommitSha = givenBranch.getCommitSha();
         Commit givenCommit = Commit.fromSha(givenBranch.getCommitSha());
@@ -157,31 +100,10 @@ public class Branch {
             return;
         }
 
-        Commit lca = Commit.fromSha(lcaSha);
-        assert lca != null;
+        Commit lcaCommit = Commit.fromSha(lcaSha);
+        assert lcaCommit != null;
 
-        Folder currentFolder = Folder.fromSha(currentCommit.getFolderSha());
-        Folder lcaFolder = Folder.fromSha(lca.getFolderSha());
-        Folder givenFolder = Folder.fromSha(givenCommit.getFolderSha());
-
-        StagingArea mergedStagingArea = createMergeStagingArea(
-            givenFolder, lcaFolder, currentFolder
-        );
-
-        Folder newFolder = mergedStagingArea.updateFolder(currentFolder);
-        String newFolderSha = newFolder.generateSha();
-        newFolder.saveToSha(newFolderSha);
-        new WorkingDirectory().reset(newFolder, mergedStagingArea);
-
-        Long timestamp = new Date().getTime();
-        Commit newCommit = new Commit(
-            "Merged " + givenBranch.name + " into " + name + ".",
-            newFolderSha,
-            currentCommit.getSha(),
-            givenCommit.getSha(),
-            timestamp
-        );
-        newCommit.save();
+        Commit newCommit = Commit.createMergeCommit(currentCommit, givenCommit, lcaCommit, givenBranch.name, name);
 
         setCommitSha(newCommit.getSha());
         save();
