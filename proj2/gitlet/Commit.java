@@ -207,8 +207,6 @@ public class Commit implements Serializable {
 
         Folder newFolder = mergedStagingArea.updateFolder(currentFolder);
         String newFolderSha = newFolder.generateSha();
-        newFolder.saveToSha(newFolderSha);
-        new WorkingDirectory().reset(newFolder, mergedStagingArea);
 
         Long timestamp = new Date().getTime();
         Commit newCommit = new Commit(
@@ -218,6 +216,9 @@ public class Commit implements Serializable {
             givenCommit.getSha(),
             timestamp
         );
+
+        new WorkingDirectory().reset(newFolder, mergedStagingArea);
+        newFolder.saveToSha(newFolderSha);
         newCommit.save();
         return newCommit;
     }
