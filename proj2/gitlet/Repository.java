@@ -282,6 +282,6 @@ public class Repository {
 
         Branch currentBranch = Branch.fromBranchName(currentBranchName);
         assert currentBranch != null;
-        currentBranch.merge(mergeBranch, stagingArea);
+        currentBranch.merge(mergeBranch);
     }
 }

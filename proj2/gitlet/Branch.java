@@ -2,7 +2,6 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -80,13 +79,19 @@ public class Branch {
     }
 
     private StagingArea createMergeStagingArea(
-            Set<String> allFiles,
-            StagingArea stagingArea,
-            Folder givenFolder,
-            Folder lcaFolder,
-            Folder currentFolder,
-            Set<String> givenFiles,
-            Set<String> currentFiles) {
+        Folder givenFolder,
+        Folder lcaFolder,
+        Folder currentFolder
+    ) {
+        Set<String> currentFiles = currentFolder.trackedFiles();
+        Set<String> givenFiles = givenFolder.trackedFiles();
+        Set<String> splitPointFiles = lcaFolder.trackedFiles();
+
+        Set<String> allFiles = new HashSet<>();
+        allFiles.addAll(givenFiles);
+        allFiles.addAll(splitPointFiles);
+
+        StagingArea stagingArea = new StagingArea();
         boolean encounteredMergeConflict = false;
 
         for (String file: allFiles) {
@@ -135,7 +140,7 @@ public class Branch {
         return stagingArea;
     }
 
-    public void merge(Branch givenBranch, StagingArea stagingArea) {
+    public void merge(Branch givenBranch) {
         Commit currentCommit = Commit.fromSha(getCommitSha());
         String givenCommitSha = givenBranch.getCommitSha();
         Commit givenCommit = Commit.fromSha(givenBranch.getCommitSha());
@@ -159,16 +164,8 @@ public class Branch {
         Folder lcaFolder = Folder.fromSha(lca.getFolderSha());
         Folder givenFolder = Folder.fromSha(givenCommit.getFolderSha());
 
-        Set<String> currentFiles = currentFolder.trackedFiles();
-        Set<String> givenFiles = givenFolder.trackedFiles();
-        Set<String> splitPointFiles = lcaFolder.trackedFiles();
-
-        Set<String> allFiles = new HashSet<>();
-        allFiles.addAll(givenFiles);
-        allFiles.addAll(splitPointFiles);
-
         StagingArea mergedStagingArea = createMergeStagingArea(
-            allFiles, stagingArea, givenFolder, lcaFolder, currentFolder, givenFiles, currentFiles
+            givenFolder, lcaFolder, currentFolder
         );
 
         Folder newFolder = mergedStagingArea.updateFolder(currentFolder);
@@ -178,11 +175,11 @@ public class Branch {
 
         Long timestamp = new Date().getTime();
         Commit newCommit = new Commit(
-                "Merged " + givenBranch.name + " into " + name + ".",
-                newFolderSha,
-                currentCommit.getSha(),
-                givenCommit.getSha(),
-                timestamp
+            "Merged " + givenBranch.name + " into " + name + ".",
+            newFolderSha,
+            currentCommit.getSha(),
+            givenCommit.getSha(),
+            timestamp
         );
         newCommit.save();
 
