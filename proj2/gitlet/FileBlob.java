@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static gitlet.Repository.CWD;
-import static gitlet.Repository.OBJECTS_FOLDER;
 
 public class FileBlob {
-    public static File FILEBLOBS_FOLDER = Utils.join(OBJECTS_FOLDER, "files");
-
     private byte[] contents;
     private String sha;
 
@@ -18,8 +15,9 @@ public class FileBlob {
         this.sha = Utils.sha1(contents);
     }
 
-    public byte[] getContents() { return contents; }
-    public String getContentAsString() { return new String(contents, StandardCharsets.UTF_8); }
+    public String getContentAsString() {
+        return new String(contents, StandardCharsets.UTF_8);
+    }
     public String getSha() {
         return sha;
     }
@@ -36,17 +34,17 @@ public class FileBlob {
     }
 
     public void save() {
-        File blobFile = Utils.join(FILEBLOBS_FOLDER, sha);
+        File blobFile = Utils.join(Repository.FILEBLOBS_FOLDER, sha);
         write(blobFile);
     }
 
     public static FileBlob fromSha(String sha) {
         try {
-            Utils.join(FILEBLOBS_FOLDER, sha);
-        } catch(NullPointerException e) {
+            Utils.join(Repository.FILEBLOBS_FOLDER, sha);
+        } catch (NullPointerException e) {
             return null;
         }
-        File fileblobFile = Utils.join(FILEBLOBS_FOLDER, sha);
+        File fileblobFile = Utils.join(Repository.FILEBLOBS_FOLDER, sha);
         return new FileBlob(Utils.readContents(fileblobFile));
     }
 

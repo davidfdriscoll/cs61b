@@ -1,32 +1,14 @@
 package gitlet;
 
-// TODO: any imports you need here
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static gitlet.Repository.OBJECTS_FOLDER;
-
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
- *  @author TODO
  */
 public class Commit implements Serializable {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided one example for `message`.
-     */
-
-    public static File COMMITS_FOLDER = Utils.join(OBJECTS_FOLDER, "commits");
-
     /** The message of this Commit. */
     private String message;
 
@@ -72,10 +54,18 @@ public class Commit implements Serializable {
     public String getSha() {
         return sha;
     }
-    public String getParentSha() { return parentSha; }
-    public String getMergeParentSha() { return mergeParentSha; }
-    public String getFolderSha() { return folderSha; }
-    public String getMessage() { return message; }
+    public String getParentSha() {
+        return parentSha;
+    }
+    public String getMergeParentSha() {
+        return mergeParentSha;
+    }
+    public String getFolderSha() {
+        return folderSha;
+    }
+    public String getMessage() {
+        return message;
+    }
 
     public static Commit fromSha(String commitSha) {
         File commitFile = findCommitPath(commitSha);
@@ -88,7 +78,7 @@ public class Commit implements Serializable {
 
     private static File findCommitPath(String commitSha) {
         String prefix = commitSha.substring(0, 2);
-        File prefixFolder = Utils.join(COMMITS_FOLDER, prefix);
+        File prefixFolder = Utils.join(Repository.COMMITS_FOLDER, prefix);
         if (!prefixFolder.exists()) {
             return null;
         }
@@ -109,7 +99,7 @@ public class Commit implements Serializable {
 
     private static File createCommitPath(String commitSha) {
         String prefix = commitSha.substring(0, 2);
-        File prefixFolder = Utils.join(COMMITS_FOLDER, prefix);
+        File prefixFolder = Utils.join(Repository.COMMITS_FOLDER, prefix);
         if (!prefixFolder.exists()) {
             prefixFolder.mkdir();
         }
@@ -117,11 +107,11 @@ public class Commit implements Serializable {
     }
 
     public static List<String> findAllCommitShas() {
-        String[] prefixes = COMMITS_FOLDER.list();
+        String[] prefixes = Repository.COMMITS_FOLDER.list();
         List<String> commitShas = new ArrayList<>();
         assert prefixes != null;
         for (String prefix: prefixes) {
-            File prefixFolder = Utils.join(COMMITS_FOLDER, prefix);
+            File prefixFolder = Utils.join(Repository.COMMITS_FOLDER, prefix);
             List<String> prefixedFiles = Utils.plainFilenamesIn(prefixFolder);
             assert prefixedFiles != null;
             commitShas.addAll(prefixedFiles);

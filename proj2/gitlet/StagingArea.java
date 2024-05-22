@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
-import static gitlet.Repository.CWD;
 import static gitlet.Repository.GITLET_DIR;
 
 public class StagingArea implements Serializable {

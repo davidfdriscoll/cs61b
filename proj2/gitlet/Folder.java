@@ -5,12 +5,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
-import static gitlet.Repository.OBJECTS_FOLDER;
 import static gitlet.Repository.CWD;
 
 public class Folder implements Serializable {
-    public static File FOLDERS_FOLDER = Utils.join(OBJECTS_FOLDER, "folders");
-
     // TreeMap<filename, fileblobsha>
     private final TreeMap<String, String> folder;
 
@@ -33,7 +30,7 @@ public class Folder implements Serializable {
     }
 
     public static Folder fromSha(String folderSha) {
-        File folderFile = Utils.join(FOLDERS_FOLDER, folderSha);
+        File folderFile = Utils.join(Repository.FOLDERS_FOLDER, folderSha);
         return fromFile(folderFile);
     }
 
@@ -51,7 +48,7 @@ public class Folder implements Serializable {
     }
 
     public void saveToSha(String sha) {
-        File folderFile = Utils.join(FOLDERS_FOLDER, sha);
+        File folderFile = Utils.join(Repository.FOLDERS_FOLDER, sha);
         saveToFile(folderFile);
     }
 
@@ -84,7 +81,9 @@ public class Folder implements Serializable {
     public void writeToWorkingDirectory(WorkingDirectory wd) {
         Set<String> untrackedFiles = wd.getUntrackedFilesSet();
         if (!Collections.disjoint(untrackedFiles, folder.keySet())) {
-            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.out.println(
+               "There is an untracked file in the way; delete it, or add and commit it first."
+            );
             throw new RuntimeException("untracked file");
         }
 

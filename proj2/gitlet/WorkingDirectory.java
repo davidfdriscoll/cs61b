@@ -3,21 +3,15 @@ package gitlet;
 import java.util.*;
 
 import static gitlet.Repository.CWD;
-import static gitlet.Repository.add;
 
 public class WorkingDirectory {
     private final List<String> files = Utils.plainFilenamesIn(CWD);
     private final Set<String> modifiedFiles = new HashSet<>();
-    private final Set<String> unmodifiedFiles = new HashSet<>();
     private final Set<String> addedFiles = new HashSet<>();
     private final Set<String> removedFiles = new HashSet<>();
 
     WorkingDirectory() {
         StagingArea stagingArea = StagingArea.fromFile();
-        init(stagingArea);
-    }
-
-    WorkingDirectory(StagingArea stagingArea) {
         init(stagingArea);
     }
 
@@ -42,11 +36,8 @@ public class WorkingDirectory {
             } else if (workingSet.contains(file) && trackedSet.contains(file)) {
                 String trackedSha = currentFolder.getFileBlobSha(file);
                 String workingSha = FileBlob.fromFilename(file).getSha();
-                // unmodified file
-                if (Objects.equals(trackedSha, workingSha)) {
-                    unmodifiedFiles.add(file);
                 // modified file
-                } else {
+                if (!Objects.equals(trackedSha, workingSha)) {
                     modifiedFiles.add(file);
                 }
             }

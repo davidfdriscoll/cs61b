@@ -3,10 +3,6 @@ package gitlet;
 import java.io.File;
 import java.util.*;
 
-import static gitlet.Branch.HEADS_FOLDER;
-import static gitlet.Commit.COMMITS_FOLDER;
-import static gitlet.FileBlob.FILEBLOBS_FOLDER;
-import static gitlet.Folder.FOLDERS_FOLDER;
 import static gitlet.Utils.*;
 
 /** Represents a gitlet repository.
@@ -14,21 +10,25 @@ import static gitlet.Utils.*;
  *  @author David Driscoll
  */
 public class Repository {
-
-    private static final Boolean useTestDirectory = false;
-
     /** The current working directory. */
     public static final File USER_DIR = new File(System.getProperty("user.dir"));
-    public static final File CWD = useTestDirectory ? join(USER_DIR, "mytest") : USER_DIR;
+    public static final File CWD = USER_DIR;
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
     /** objects folder within .gitlet directory */
-    public static File OBJECTS_FOLDER = Utils.join(GITLET_DIR, "objects");
-    public static File REFS_FOLDER = Utils.join(GITLET_DIR, "refs");
+    public static final File OBJECTS_FOLDER = Utils.join(GITLET_DIR, "objects");
+    public static final File FOLDERS_FOLDER = join(OBJECTS_FOLDER, "folders");
+    public static final File FILEBLOBS_FOLDER = join(OBJECTS_FOLDER, "files");
+    public static final File COMMITS_FOLDER = join(OBJECTS_FOLDER, "commits");
+    public static final File REFS_FOLDER = Utils.join(GITLET_DIR, "refs");
+    public static final File HEADS_FOLDER = join(REFS_FOLDER, "heads");
+
 
     public static void init() {
         if (GITLET_DIR.exists()) {
-            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            System.out.println(
+                "A Gitlet version-control system already exists in the current directory."
+            );
             return;
         }
 

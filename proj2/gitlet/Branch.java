@@ -8,11 +8,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import static gitlet.Repository.REFS_FOLDER;
-
 public class Branch {
-    public static File HEADS_FOLDER = Utils.join(REFS_FOLDER, "heads");
-
     private final String name;
     private String commitSha;
 
@@ -22,7 +18,7 @@ public class Branch {
     }
 
     public static Branch fromBranchName(String name) {
-        File branchFile = Utils.join(HEADS_FOLDER, name);
+        File branchFile = Utils.join(Repository.HEADS_FOLDER, name);
         if (!branchFile.exists()) {
             return null;
         }
@@ -31,7 +27,7 @@ public class Branch {
     }
 
     public void save() {
-        File branchFile = Utils.join(HEADS_FOLDER, name);
+        File branchFile = Utils.join(Repository.HEADS_FOLDER, name);
         if (!branchFile.exists()) {
             try {
                 branchFile.createNewFile();
@@ -43,7 +39,7 @@ public class Branch {
     }
 
     public void delete() {
-        File branchFile = Utils.join(HEADS_FOLDER, name);
+        File branchFile = Utils.join(Repository.HEADS_FOLDER, name);
         branchFile.delete();
     }
 
@@ -118,41 +114,44 @@ public class Branch {
             String lcaFileSha = lcaFolder.getFileBlobSha(file);
             String currentFileSha = currentFolder.getFileBlobSha(file);
 
-            boolean added = !lcaFolder.containsFile(file) &&
-                                givenFiles.contains(file) &&
-                                !currentFiles.contains(file);
-            boolean removed = lcaFolder.containsFile(file) &&
-                                !givenFiles.contains(file) &&
-                                Objects.equals(lcaFileSha, currentFileSha);
+            boolean added = !lcaFolder.containsFile(file)
+                    && givenFiles.contains(file)
+                    && !currentFiles.contains(file);
+            boolean removed = lcaFolder.containsFile(file)
+                    && !givenFiles.contains(file)
+                    && Objects.equals(lcaFileSha, currentFileSha);
             boolean modified = !Objects.equals(lcaFileSha, givenFileSha);
 
             // added to given branch since split and not present in current branch -> add
             if (added) {
                 FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
                 stagingArea.addFile(file, fileBlob, currentFolder);
-            }
             // removed from given branch since split and unmodified in current branch -> remove
-            else if (removed) {
+            } else if (removed) {
                 stagingArea.removeFile(file, currentFolder);
-            }
             // modified in given branch since split
-            else if (modified) {
-                // modified in the same way (have same content or removed) -> do nothing
-                if (Objects.equals(givenFileSha, currentFileSha)) {}
+            } else if (modified) {
                 // unmodified in current branch -> replace with given branch version
-                else if (currentFolder.containsFile(file) && Objects.equals(currentFileSha, lcaFileSha)) {
+                if (currentFolder.containsFile(file) && Objects.equals(currentFileSha, lcaFileSha)) {
                     FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
                     stagingArea.addFile(file, fileBlob, currentFolder);
-                }
                 // modified in different ways: concat the two versions
-                else {
+                } else if (!Objects.equals(givenFileSha, currentFileSha)) {
                     encounteredMergeConflict = true;
                     FileBlob currentFile = FileBlob.fromSha(currentFileSha);
                     FileBlob givenFile = FileBlob.fromSha(givenFileSha);
-                    String currentFileString = currentFile == null ? "" : currentFile.getContentAsString();
-                    String givenFileString = givenFile == null ? "" : givenFile.getContentAsString();
-                    String mergeString = "<<<<<<< HEAD\n" + currentFileString + "=======\n" + givenFileString + ">>>>>>>\n";
-                    FileBlob mergeFileBlob = new FileBlob(mergeString.getBytes(StandardCharsets.UTF_8));
+                    String currentFileString =
+                            currentFile == null ? "" : currentFile.getContentAsString();
+                    String givenFileString =
+                            givenFile == null ? "" : givenFile.getContentAsString();
+                    String mergeString =
+                            "<<<<<<< HEAD\n"
+                                    + currentFileString
+                                    + "=======\n"
+                                    + givenFileString
+                                    + ">>>>>>>\n";
+                    FileBlob mergeFileBlob =
+                            new FileBlob(mergeString.getBytes(StandardCharsets.UTF_8));
                     stagingArea.addFile(file, mergeFileBlob, currentFolder);
                     mergeFileBlob.save();
                 }
