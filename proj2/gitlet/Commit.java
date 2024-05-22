@@ -217,7 +217,9 @@ public class Commit implements Serializable {
             timestamp
         );
 
-        new WorkingDirectory().reset(newFolder, mergedStagingArea);
+        // after creating all the objects, save to disk, starting with updating the working directory
+        // (which will throw exception if there is a file in the way)
+        newFolder.writeToWorkingDirectory(new WorkingDirectory());
         newFolder.saveToSha(newFolderSha);
         newCommit.save();
         return newCommit;
