@@ -151,6 +151,17 @@ public class Commit implements Serializable {
         System.out.println();
     }
 
+    private static void addAncestorsToQueue(String commitSha, Deque<String> queue) {
+        Commit commit = Commit.fromSha(commitSha);
+        assert commit != null;
+        if (!Objects.equals(commit.getParentSha(), "-1")) {
+            queue.add(commit.getParentSha());
+        }
+        if (!Objects.equals(commit.getMergeParentSha(), "-1")) {
+            queue.add(commit.getMergeParentSha());
+        }
+    }
+
     public static String latestCommonAncestor(Commit left, Commit right) {
         Set<String> leftAncestry = new HashSet<>();
 
@@ -162,14 +173,7 @@ public class Commit implements Serializable {
         while (!queue.isEmpty()) {
             sha = queue.removeFirst();
             leftAncestry.add(sha);
-            Commit commit = Commit.fromSha(sha);
-            assert commit != null;
-            if (!Objects.equals(commit.getParentSha(), "-1")) {
-                queue.add(commit.getParentSha());
-            }
-            if (!Objects.equals(commit.getMergeParentSha(), "-1")) {
-                queue.add(commit.getMergeParentSha());
-            }
+            addAncestorsToQueue(sha, queue);
         }
 
         sha = right.getSha();
@@ -181,15 +185,41 @@ public class Commit implements Serializable {
             if (leftAncestry.contains(sha)) {
                 return sha;
             }
-            Commit commit = Commit.fromSha(sha);
-            assert commit != null;
-            if (!Objects.equals(commit.getParentSha(), "-1")) {
-                queue.add(commit.getParentSha());
-            }
-            if (!Objects.equals(commit.getMergeParentSha(), "-1")) {
-                queue.add(commit.getMergeParentSha());
-            }
+            addAncestorsToQueue(sha, queue);
         }
         return null;
+    }
+
+    public static Commit createMergeCommit(
+        Commit currentCommit,
+        Commit givenCommit,
+        Commit lcaCommit,
+        String givenBranchName,
+        String currentBranchName
+    ) {
+        Folder currentFolder = Folder.fromSha(currentCommit.getFolderSha());
+        Folder lcaFolder = Folder.fromSha(lcaCommit.getFolderSha());
+        Folder givenFolder = Folder.fromSha(givenCommit.getFolderSha());
+
+        StagingArea mergedStagingArea = StagingArea.createMergeStagingArea(
+            givenFolder, lcaFolder, currentFolder
+        );
+
+        Folder newFolder = mergedStagingArea.updateFolder(currentFolder);
+        String newFolderSha = newFolder.generateSha();
+
+        Long timestamp = new Date().getTime();
+        Commit newCommit = new Commit(
+            "Merged " + givenBranchName + " into " + currentBranchName + ".",
+            newFolderSha,
+            currentCommit.getSha(),
+            givenCommit.getSha(),
+            timestamp
+        );
+
+        new WorkingDirectory().reset(newFolder, mergedStagingArea);
+        newFolder.saveToSha(newFolderSha);
+        newCommit.save();
+        return newCommit;
     }
 }

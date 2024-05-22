@@ -96,4 +96,66 @@ public class StagingArea implements Serializable {
     public boolean isEmpty() {
         return stagedAdds.isEmpty() && stagedRemoves.isEmpty();
     }
+
+    public static StagingArea createMergeStagingArea(
+        Folder givenFolder,
+        Folder lcaFolder,
+        Folder currentFolder
+    ) {
+        Set<String> currentFiles = currentFolder.trackedFiles();
+        Set<String> givenFiles = givenFolder.trackedFiles();
+        Set<String> splitPointFiles = lcaFolder.trackedFiles();
+
+        Set<String> allFiles = new HashSet<>();
+        allFiles.addAll(givenFiles);
+        allFiles.addAll(splitPointFiles);
+
+        StagingArea stagingArea = new StagingArea();
+        boolean encounteredMergeConflict = false;
+
+        for (String file: allFiles) {
+            String givenFileSha = givenFolder.getFileBlobSha(file);
+            String lcaFileSha = lcaFolder.getFileBlobSha(file);
+            String currentFileSha = currentFolder.getFileBlobSha(file);
+
+            boolean added = !lcaFolder.containsFile(file)
+                && givenFiles.contains(file)
+                && !currentFiles.contains(file);
+            boolean removed = lcaFolder.containsFile(file)
+                && !givenFiles.contains(file)
+                && Objects.equals(lcaFileSha, currentFileSha);
+            boolean modified = !Objects.equals(lcaFileSha, givenFileSha);
+
+            // added to given branch since split and not present in current branch -> add
+            if (added) {
+                FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
+                stagingArea.addFile(file, fileBlob, currentFolder);
+                // removed from given branch since split and unmodified in current branch -> remove
+            } else if (removed) {
+                stagingArea.removeFile(file, currentFolder);
+                // modified in given branch since split
+            } else if (modified) {
+                // unmodified in current branch -> replace with given branch version
+                if (currentFolder.containsFile(file)
+                        && Objects.equals(currentFileSha, lcaFileSha)
+                ) {
+                    FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
+                    stagingArea.addFile(file, fileBlob, currentFolder);
+                    // modified in different ways: concat the two versions
+                } else if (!Objects.equals(givenFileSha, currentFileSha)) {
+                    encounteredMergeConflict = true;
+                    FileBlob mergeFileBlob =
+                        FileBlob.mergeConflictFileBlob(currentFileSha, givenFileSha);
+                    stagingArea.addFile(file, mergeFileBlob, currentFolder);
+                    mergeFileBlob.save();
+                }
+            }
+        }
+
+        if (encounteredMergeConflict) {
+            System.out.println("Encountered a merge conflict.");
+        }
+
+        return stagingArea;
+    }
 }

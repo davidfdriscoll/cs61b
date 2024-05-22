@@ -275,11 +275,6 @@ public class Repository {
             return;
         }
         String currentBranchName = Head.getBranchName();
-        if (Objects.equals(givenBranchName, currentBranchName)) {
-            System.out.println("Cannot merge a branch with itself.");
-            return;
-        }
-
         Branch currentBranch = Branch.fromBranchName(currentBranchName);
         assert currentBranch != null;
         currentBranch.merge(mergeBranch);
