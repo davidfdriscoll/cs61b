@@ -72,10 +72,73 @@ public class Branch {
         checkout(branch);
     }
 
+    private void fastForward(String givenCommitSha) {
+        new WorkingDirectory().reset(givenCommitSha);
+        setCommitSha(givenCommitSha);
+        save();
+        System.out.println("Current branch fast-forwarded.");
+    }
+
+    private StagingArea createMergeStagingArea(
+            Set<String> allFiles,
+            StagingArea stagingArea,
+            Folder givenFolder,
+            Folder lcaFolder,
+            Folder currentFolder,
+            Set<String> givenFiles,
+            Set<String> currentFiles) {
+        boolean encounteredMergeConflict = false;
+
+        for (String file: allFiles) {
+            String givenFileSha = givenFolder.getFileBlobSha(file);
+            String lcaFileSha = lcaFolder.getFileBlobSha(file);
+            String currentFileSha = currentFolder.getFileBlobSha(file);
+
+            boolean added = !lcaFolder.containsFile(file)
+                && givenFiles.contains(file)
+                && !currentFiles.contains(file);
+            boolean removed = lcaFolder.containsFile(file)
+                && !givenFiles.contains(file)
+                && Objects.equals(lcaFileSha, currentFileSha);
+            boolean modified = !Objects.equals(lcaFileSha, givenFileSha);
+
+            // added to given branch since split and not present in current branch -> add
+            if (added) {
+                FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
+                stagingArea.addFile(file, fileBlob, currentFolder);
+                // removed from given branch since split and unmodified in current branch -> remove
+            } else if (removed) {
+                stagingArea.removeFile(file, currentFolder);
+                // modified in given branch since split
+            } else if (modified) {
+                // unmodified in current branch -> replace with given branch version
+                if (currentFolder.containsFile(file)
+                        && Objects.equals(currentFileSha, lcaFileSha)
+                ) {
+                    FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
+                    stagingArea.addFile(file, fileBlob, currentFolder);
+                    // modified in different ways: concat the two versions
+                } else if (!Objects.equals(givenFileSha, currentFileSha)) {
+                    encounteredMergeConflict = true;
+                    FileBlob mergeFileBlob =
+                        FileBlob.mergeConflictFileBlob(currentFileSha, givenFileSha);
+                    stagingArea.addFile(file, mergeFileBlob, currentFolder);
+                    mergeFileBlob.save();
+                }
+            }
+        }
+
+        if (encounteredMergeConflict) {
+            System.out.println("Encountered a merge conflict.");
+        }
+
+        return stagingArea;
+    }
+
     public void merge(Branch givenBranch, StagingArea stagingArea) {
         Commit currentCommit = Commit.fromSha(getCommitSha());
         String givenCommitSha = givenBranch.getCommitSha();
-        Commit givenCommit = Commit.fromSha(givenCommitSha);
+        Commit givenCommit = Commit.fromSha(givenBranch.getCommitSha());
         assert currentCommit != null;
         assert givenCommit != null;
 
@@ -85,10 +148,7 @@ public class Branch {
             return;
         }
         if (Objects.equals(commitSha, lcaSha)) {
-            new WorkingDirectory().reset(givenCommitSha);
-            setCommitSha(givenCommitSha);
-            save();
-            System.out.println("Current branch fast-forwarded.");
+            fastForward(givenCommitSha);
             return;
         }
 
@@ -107,65 +167,14 @@ public class Branch {
         allFiles.addAll(givenFiles);
         allFiles.addAll(splitPointFiles);
 
-        boolean encounteredMergeConflict = false;
+        StagingArea mergedStagingArea = createMergeStagingArea(
+            allFiles, stagingArea, givenFolder, lcaFolder, currentFolder, givenFiles, currentFiles
+        );
 
-        for (String file: allFiles) {
-            String givenFileSha = givenFolder.getFileBlobSha(file);
-            String lcaFileSha = lcaFolder.getFileBlobSha(file);
-            String currentFileSha = currentFolder.getFileBlobSha(file);
-
-            boolean added = !lcaFolder.containsFile(file)
-                    && givenFiles.contains(file)
-                    && !currentFiles.contains(file);
-            boolean removed = lcaFolder.containsFile(file)
-                    && !givenFiles.contains(file)
-                    && Objects.equals(lcaFileSha, currentFileSha);
-            boolean modified = !Objects.equals(lcaFileSha, givenFileSha);
-
-            // added to given branch since split and not present in current branch -> add
-            if (added) {
-                FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
-                stagingArea.addFile(file, fileBlob, currentFolder);
-            // removed from given branch since split and unmodified in current branch -> remove
-            } else if (removed) {
-                stagingArea.removeFile(file, currentFolder);
-            // modified in given branch since split
-            } else if (modified) {
-                // unmodified in current branch -> replace with given branch version
-                if (currentFolder.containsFile(file) && Objects.equals(currentFileSha, lcaFileSha)) {
-                    FileBlob fileBlob = FileBlob.fromSha(givenFileSha);
-                    stagingArea.addFile(file, fileBlob, currentFolder);
-                // modified in different ways: concat the two versions
-                } else if (!Objects.equals(givenFileSha, currentFileSha)) {
-                    encounteredMergeConflict = true;
-                    FileBlob currentFile = FileBlob.fromSha(currentFileSha);
-                    FileBlob givenFile = FileBlob.fromSha(givenFileSha);
-                    String currentFileString =
-                            currentFile == null ? "" : currentFile.getContentAsString();
-                    String givenFileString =
-                            givenFile == null ? "" : givenFile.getContentAsString();
-                    String mergeString =
-                            "<<<<<<< HEAD\n"
-                                    + currentFileString
-                                    + "=======\n"
-                                    + givenFileString
-                                    + ">>>>>>>\n";
-                    FileBlob mergeFileBlob =
-                            new FileBlob(mergeString.getBytes(StandardCharsets.UTF_8));
-                    stagingArea.addFile(file, mergeFileBlob, currentFolder);
-                    mergeFileBlob.save();
-                }
-            }
-        }
-
-        if (encounteredMergeConflict) {
-            System.out.println("Encountered a merge conflict.");
-        }
-
-        Folder newFolder = stagingArea.updateFolder(currentFolder);
+        Folder newFolder = mergedStagingArea.updateFolder(currentFolder);
         String newFolderSha = newFolder.generateSha();
         newFolder.saveToSha(newFolderSha);
-        new WorkingDirectory().reset(newFolder, stagingArea);
+        new WorkingDirectory().reset(newFolder, mergedStagingArea);
 
         Long timestamp = new Date().getTime();
         Commit newCommit = new Commit(

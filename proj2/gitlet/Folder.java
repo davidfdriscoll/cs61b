@@ -82,7 +82,7 @@ public class Folder implements Serializable {
         Set<String> untrackedFiles = wd.getUntrackedFilesSet();
         if (!Collections.disjoint(untrackedFiles, folder.keySet())) {
             System.out.println(
-               "There is an untracked file in the way; delete it, or add and commit it first."
+                "There is an untracked file in the way; delete it, or add and commit it first."
             );
             throw new RuntimeException("untracked file");
         }

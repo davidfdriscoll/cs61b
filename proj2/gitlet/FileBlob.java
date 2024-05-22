@@ -57,6 +57,22 @@ public class FileBlob {
         return new FileBlob(fileContents);
     }
 
+    public static FileBlob mergeConflictFileBlob(String currentFileSha, String givenFileSha) {
+        FileBlob currentFile = FileBlob.fromSha(currentFileSha);
+        FileBlob givenFile = FileBlob.fromSha(givenFileSha);
+        String currentFileString =
+                currentFile == null ? "" : currentFile.getContentAsString();
+        String givenFileString =
+                givenFile == null ? "" : givenFile.getContentAsString();
+        String mergeString =
+                "<<<<<<< HEAD\n"
+                        + currentFileString
+                        + "=======\n"
+                        + givenFileString
+                        + ">>>>>>>\n";
+        return new FileBlob(mergeString.getBytes(StandardCharsets.UTF_8));
+    }
+
     public void writeToFile(String filename) {
         File workingLocation = Utils.join(CWD, filename);
         write(workingLocation);

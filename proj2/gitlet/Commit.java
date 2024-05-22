@@ -90,8 +90,9 @@ public class Commit implements Serializable {
             List<String> candidateShas = Utils.plainFilenamesIn(prefixFolder);
             assert candidateShas != null;
             for (String candidateSha: candidateShas) {
-                if (candidateSha.startsWith(commitSha))
+                if (candidateSha.startsWith(commitSha)) {
                     return Utils.join(prefixFolder, candidateSha);
+                }
             }
             return null;
         }
@@ -138,7 +139,12 @@ public class Commit implements Serializable {
         System.out.println("===");
         System.out.println("commit " + sha);
         if (!Objects.equals(mergeParentSha, "-1")) {
-            System.out.println("Merge: " + parentSha.substring(0, 7) + " " + mergeParentSha.substring(0, 7));
+            System.out.println(
+                "Merge: "
+                + parentSha.substring(0, 7)
+                + " "
+                + mergeParentSha.substring(0, 7)
+            );
         }
         System.out.println("Date: " + simpleDateFormat.format(date));
         System.out.println(message);
