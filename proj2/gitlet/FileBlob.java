@@ -34,7 +34,11 @@ public class FileBlob {
     }
 
     public void save() {
-        File blobFile = Utils.join(Repository.getFileBlobsDir(GITLET_DIR), sha);
+        save(GITLET_DIR);
+    }
+
+    public void save(File dir) {
+        File blobFile = Utils.join(Repository.getFileBlobsDir(dir), sha);
         write(blobFile);
     }
 
@@ -47,8 +51,8 @@ public class FileBlob {
         return Utils.join(folder, sha);
     }
 
-    public static boolean shaExists(String sha) {
-        File fileblobFile = getFileBlobFile(Repository.getFileBlobsDir(GITLET_DIR), sha);
+    public static boolean shaExists(File dir, String sha) {
+        File fileblobFile = getFileBlobFile(Repository.getFileBlobsDir(dir), sha);
         assert fileblobFile != null;
         return fileblobFile.exists();
     }
@@ -59,8 +63,8 @@ public class FileBlob {
         return new FileBlob(Utils.readContents(fileblobFile));
     }
 
-    public static FileBlob fromRemoteSha(Remote remote, String sha) {
-        File fileblobDir = getFileBlobsDir(remote.getRemotePath());
+    public static FileBlob fromRemoteSha(File remotePath, String sha) {
+        File fileblobDir = getFileBlobsDir(remotePath);
         File fileblobFile = getFileBlobFile(fileblobDir, sha);
         assert fileblobFile != null;
         return new FileBlob(Utils.readContents(fileblobFile));

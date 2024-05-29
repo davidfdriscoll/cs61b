@@ -324,6 +324,10 @@ public class Repository {
         Remote remote = Remote.fromRemoteName(remoteName);
         assert remote != null;
         Branch remoteBranch = Branch.fromRemote(remote, remoteBranchName);
+        if (remoteBranch == null) {
+            System.out.println("That remote does not have that branch.");
+            throw new RuntimeException();
+        }
         String remoteCommitSha = remoteBranch.getCommitSha();
 
         String localName = remoteName + FileSystems.getDefault().getSeparator() + remoteBranchName;
@@ -335,33 +339,28 @@ public class Repository {
         }
         localBranch.save();
 
-        Deque<String> queue = new ArrayDeque<>();
-        queue.add(remoteCommitSha);
+        Commit.copyToRepository(remoteCommitSha, GITLET_DIR, remote.getRemotePath());
+    }
 
-        while (!queue.isEmpty()) {
-            String commitSha = queue.removeFirst();
-            if (commitSha.equals("-1") || Commit.doesShaExist(commitSha)) {
-                continue;
-            }
-            Commit commit = Commit.fromRemote(remote, commitSha);
-            queue.add(commit.getParentSha());
-            queue.add(commit.getMergeParentSha());
-            commit.save();
+    public static void push(String remoteName, String remoteBranchName) {
+        Remote remote = Remote.fromRemoteName(remoteName);
+        assert remote != null;
+        Branch remoteBranch = Branch.fromRemote(remote, remoteBranchName);
+        String remoteCommitSha = remoteBranch.getCommitSha();
 
-            String folderSha = commit.getFolderSha();
-            Folder folder = Folder.fromRemote(remote, folderSha);
-            if (Folder.fromSha(folderSha) != null) {
-                continue;
-            }
-            folder.saveToSha(folderSha);
+        String localBranchName = Head.getBranchName();
+        Branch localBranch = Branch.fromBranchName(localBranchName);
+        String localCommitSha = localBranch.getCommitSha();
+        Commit localCommit = Commit.fromSha(localCommitSha);
 
-            for (String fileSha : folder.folderMap().values()) {
-                if (FileBlob.shaExists(fileSha)) {
-                    continue;
-                }
-                FileBlob blob = FileBlob.fromRemoteSha(remote, fileSha);
-                blob.save();
-            }
+        Set<String> ancestry = Commit.getAncestry(GITLET_DIR, localCommit);
+        if (!ancestry.contains(remoteCommitSha)) {
+            System.out.println("Please pull down remote changes before pushing.");
+            throw new RuntimeException();
         }
+
+        Commit.copyToRepository(localCommitSha, remote.getRemotePath(), GITLET_DIR);
+        remoteBranch.setCommitSha(localCommitSha);
+        remoteBranch.save(remote.getRemotePath());
     }
 }

@@ -6,6 +6,8 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static gitlet.Repository.GITLET_DIR;
+
 /** Represents a gitlet commit object.
  */
 public class Commit implements Serializable {
@@ -67,14 +69,16 @@ public class Commit implements Serializable {
         return message;
     }
 
-    public static boolean doesShaExist(String commitSha) {
-        File commitFile = findCommitPath(Repository.getCommitsDir(Repository.GITLET_DIR), commitSha);
-        assert commitFile != null;
+    public static boolean doesShaExist(File dir, String commitSha) {
+        File commitFile = findCommitPath(Repository.getCommitsDir(dir), commitSha);
+        if (commitFile == null) {
+            return false;
+        }
         return commitFile.exists();
     }
 
     public static Commit fromSha(String commitSha) {
-        File commitFile = findCommitPath(Repository.getCommitsDir(Repository.GITLET_DIR), commitSha);
+        File commitFile = findCommitPath(Repository.getCommitsDir(GITLET_DIR), commitSha);
         if (commitFile == null || !commitFile.exists()) {
             System.out.println("No commit with that id exists.");
             throw new RuntimeException();
@@ -82,9 +86,9 @@ public class Commit implements Serializable {
         return Utils.readObject(commitFile, Commit.class);
     }
 
-    public static Commit fromRemote(Remote remote, String commitSha) {
-        File commitsDir = Repository.getCommitsDir(remote.getRemotePath());
-        File commitFile = findCommitPath(commitsDir , commitSha);
+    public static Commit fromDir(File dir, String commitSha) {
+        File commitsDir = Repository.getCommitsDir(dir);
+        File commitFile = findCommitPath(commitsDir, commitSha);
         return Utils.readObject(commitFile, Commit.class);
     }
 
@@ -110,9 +114,9 @@ public class Commit implements Serializable {
         }
     }
 
-    private static File createCommitPath(String commitSha) {
+    private static File createCommitPath(File dir, String commitSha) {
         String prefix = commitSha.substring(0, 2);
-        File prefixFolder = Utils.join(Repository.getCommitsDir(Repository.GITLET_DIR), prefix);
+        File prefixFolder = Utils.join(Repository.getCommitsDir(dir), prefix);
         if (!prefixFolder.exists()) {
             prefixFolder.mkdir();
         }
@@ -120,11 +124,11 @@ public class Commit implements Serializable {
     }
 
     public static List<String> findAllCommitShas() {
-        String[] prefixes = Repository.getCommitsDir(Repository.GITLET_DIR).list();
+        String[] prefixes = Repository.getCommitsDir(GITLET_DIR).list();
         List<String> commitShas = new ArrayList<>();
         assert prefixes != null;
         for (String prefix: prefixes) {
-            File prefixFolder = Utils.join(Repository.getCommitsDir(Repository.GITLET_DIR), prefix);
+            File prefixFolder = Utils.join(Repository.getCommitsDir(GITLET_DIR), prefix);
             List<String> prefixedFiles = Utils.plainFilenamesIn(prefixFolder);
             assert prefixedFiles != null;
             commitShas.addAll(prefixedFiles);
@@ -133,7 +137,11 @@ public class Commit implements Serializable {
     }
 
     public void save() {
-        File commitFile = createCommitPath(sha);
+        save(GITLET_DIR);
+    }
+
+    public void save(File path) {
+        File commitFile = createCommitPath(path, sha);
         if (!commitFile.exists()) {
             try {
                 commitFile.createNewFile();
@@ -163,8 +171,8 @@ public class Commit implements Serializable {
         System.out.println();
     }
 
-    private static void addAncestorsToQueue(String commitSha, Deque<String> queue) {
-        Commit commit = Commit.fromSha(commitSha);
+    private static void addAncestorsToQueue(File dir, String commitSha, Deque<String> queue) {
+        Commit commit = Commit.fromDir(dir, commitSha);
         assert commit != null;
         if (!Objects.equals(commit.getParentSha(), "-1")) {
             queue.add(commit.getParentSha());
@@ -174,21 +182,28 @@ public class Commit implements Serializable {
         }
     }
 
-    public static String latestCommonAncestor(Commit left, Commit right) {
-        Set<String> leftAncestry = new HashSet<>();
+    public static Set<String> getAncestry(File dir, Commit commit) {
+        Set<String> ancestry = new HashSet<>();
 
         Deque<String> queue = new ArrayDeque<>();
-        String sha = left.getSha();
+        String sha = commit.getSha();
         if (!Objects.equals(sha, "-1")) {
             queue.add(sha);
         }
         while (!queue.isEmpty()) {
             sha = queue.removeFirst();
-            leftAncestry.add(sha);
-            addAncestorsToQueue(sha, queue);
+            ancestry.add(sha);
+            addAncestorsToQueue(dir, sha, queue);
         }
 
-        sha = right.getSha();
+        return ancestry;
+    }
+
+    public static String latestCommonAncestor(Commit left, Commit right, File leftDir, File rightDir) {
+        Set<String> leftAncestry = getAncestry(leftDir, left);
+
+        Deque<String> queue = new ArrayDeque<>();
+        String sha = right.getSha();
         if (!Objects.equals(sha, "-1")) {
             queue.add(sha);
         }
@@ -197,7 +212,7 @@ public class Commit implements Serializable {
             if (leftAncestry.contains(sha)) {
                 return sha;
             }
-            addAncestorsToQueue(sha, queue);
+            addAncestorsToQueue(rightDir, sha, queue);
         }
         return null;
     }
@@ -235,5 +250,36 @@ public class Commit implements Serializable {
         newFolder.saveToSha(newFolderSha);
         newCommit.save();
         return newCommit;
+    }
+
+    public static void copyToRepository(String sha, File toGitletDir, File fromGitletDir) {
+        Deque<String> queue = new ArrayDeque<>();
+        queue.add(sha);
+
+        while (!queue.isEmpty()) {
+            String commitSha = queue.removeFirst();
+            if (commitSha.equals("-1") || Commit.doesShaExist(toGitletDir, commitSha)) {
+                continue;
+            }
+            Commit commit = Commit.fromDir(fromGitletDir, commitSha);
+            queue.add(commit.getParentSha());
+            queue.add(commit.getMergeParentSha());
+            commit.save(toGitletDir);
+
+            String folderSha = commit.getFolderSha();
+            Folder folder = Folder.fromRemote(fromGitletDir, folderSha);
+            if (Folder.fromSha(folderSha) != null) {
+                continue;
+            }
+            folder.saveToSha(toGitletDir, folderSha);
+
+            for (String fileSha : folder.folderMap().values()) {
+                if (FileBlob.shaExists(toGitletDir, fileSha)) {
+                    continue;
+                }
+                FileBlob blob = FileBlob.fromRemoteSha(fromGitletDir, fileSha);
+                blob.save(toGitletDir);
+            }
+        }
     }
 }

@@ -38,8 +38,8 @@ public class Folder implements Serializable {
         return fromFile(folderFile);
     }
 
-    public static Folder fromRemote(Remote remote, String folderSha) {
-        File folderDir = Repository.getFoldersDir(remote.getRemotePath());
+    public static Folder fromRemote(File remotePath, String folderSha) {
+        File folderDir = Repository.getFoldersDir(remotePath);
         File folderFile = Utils.join(folderDir, folderSha);
         return fromFile(folderFile);
     }
@@ -58,7 +58,11 @@ public class Folder implements Serializable {
     }
 
     public void saveToSha(String sha) {
-        File folderFile = Utils.join(Repository.getFoldersDir(GITLET_DIR), sha);
+        saveToSha(GITLET_DIR, sha);
+    }
+
+    public void saveToSha(File dir, String sha) {
+        File folderFile = Utils.join(Repository.getFoldersDir(dir), sha);
         saveToFile(folderFile);
     }
 

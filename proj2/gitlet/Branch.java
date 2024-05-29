@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
+import static gitlet.Repository.GITLET_DIR;
+
 public class Branch {
     private final String name;
     private String commitSha;
@@ -23,7 +25,7 @@ public class Branch {
     }
 
     public static Branch fromBranchName(String name) {
-        return fromFolderAndName(Repository.GITLET_DIR, name);
+        return fromFolderAndName(GITLET_DIR, name);
     }
 
     public static Branch fromRemote(Remote remote, String branchName) {
@@ -31,8 +33,8 @@ public class Branch {
         return fromFolderAndName(directory, branchName);
     }
 
-    public void save() {
-        File branchFile = Utils.join(Repository.getHeadsDir(Repository.GITLET_DIR), name);
+    public void save(File dir) {
+        File branchFile = Utils.join(Repository.getHeadsDir(dir), name);
         if (!branchFile.exists()) {
             try {
                 branchFile.createNewFile();
@@ -43,8 +45,12 @@ public class Branch {
         Utils.writeContents(branchFile, commitSha);
     }
 
+    public void save() {
+        save(GITLET_DIR);
+    }
+
     public void delete() {
-        File branchFile = Utils.join(Repository.getHeadsDir(Repository.GITLET_DIR), name);
+        File branchFile = Utils.join(Repository.getHeadsDir(GITLET_DIR), name);
         branchFile.delete();
     }
 
@@ -96,7 +102,7 @@ public class Branch {
         assert currentCommit != null;
         assert givenCommit != null;
 
-        String lcaSha = Commit.latestCommonAncestor(currentCommit, givenCommit);
+        String lcaSha = Commit.latestCommonAncestor(currentCommit, givenCommit, GITLET_DIR, GITLET_DIR);
         if (Objects.equals(givenCommitSha, lcaSha)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             return;

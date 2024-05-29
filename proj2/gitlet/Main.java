@@ -19,8 +19,7 @@ public class Main {
         }
         try {
             runCommands(args);
-        } catch(Exception e) {
-            return;
+        } catch (Exception ignored) {
         }
     }
 
@@ -103,6 +102,11 @@ public class Main {
                 branchName = args[2];
                 Repository.fetch(remoteName, branchName);
                 break;
+            case "push":
+                validateNumArgs("push", args, 3);
+                remoteName = args[1];
+                branchName = args[2];
+                Repository.push(remoteName, branchName);
             case "reset":
                 validateNumArgs("reset", args, 2);
                 commitSha = args[1];
