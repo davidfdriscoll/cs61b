@@ -107,6 +107,13 @@ public class Main {
                 remoteName = args[1];
                 branchName = args[2];
                 Repository.push(remoteName, branchName);
+                break;
+            case "pull":
+                validateNumArgs("pull", args, 3);
+                remoteName = args[1];
+                branchName = args[2];
+                Repository.pull(remoteName, branchName);
+                break;
             case "reset":
                 validateNumArgs("reset", args, 2);
                 commitSha = args[1];

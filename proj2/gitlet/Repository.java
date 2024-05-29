@@ -320,9 +320,17 @@ public class Repository {
         currentBranch.merge(mergeBranch);
     }
 
+    private static String createLocalNameForRemote(String remoteName, String remoteBranchName) {
+        return remoteName + FileSystems.getDefault().getSeparator() + remoteBranchName;
+    }
+
     public static void fetch(String remoteName, String remoteBranchName) {
         Remote remote = Remote.fromRemoteName(remoteName);
         assert remote != null;
+        if (!remote.getRemotePath().exists()) {
+            System.out.println("Remote directory not found.");
+            throw new RuntimeException();
+        }
         Branch remoteBranch = Branch.fromRemote(remote, remoteBranchName);
         if (remoteBranch == null) {
             System.out.println("That remote does not have that branch.");
@@ -330,7 +338,7 @@ public class Repository {
         }
         String remoteCommitSha = remoteBranch.getCommitSha();
 
-        String localName = remoteName + FileSystems.getDefault().getSeparator() + remoteBranchName;
+        String localName = createLocalNameForRemote(remoteName, remoteBranchName);
         Branch localBranch = Branch.fromBranchName(localName);
         if (localBranch == null) {
             localBranch = new Branch(localName, remoteCommitSha);
@@ -345,6 +353,10 @@ public class Repository {
     public static void push(String remoteName, String remoteBranchName) {
         Remote remote = Remote.fromRemoteName(remoteName);
         assert remote != null;
+        if (!remote.getRemotePath().exists()) {
+            System.out.println("Remote directory not found.");
+            throw new RuntimeException();
+        }
         Branch remoteBranch = Branch.fromRemote(remote, remoteBranchName);
         String remoteCommitSha = remoteBranch.getCommitSha();
 
@@ -362,5 +374,11 @@ public class Repository {
         Commit.copyToRepository(localCommitSha, remote.getRemotePath(), GITLET_DIR);
         remoteBranch.setCommitSha(localCommitSha);
         remoteBranch.save(remote.getRemotePath());
+    }
+
+    public static void pull(String remoteName, String remoteBranchName) {
+        fetch(remoteName, remoteBranchName);
+        String localName = createLocalNameForRemote(remoteName, remoteBranchName);
+        merge(localName);
     }
 }

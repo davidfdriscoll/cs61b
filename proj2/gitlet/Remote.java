@@ -22,7 +22,8 @@ public class Remote {
             return null;
         }
         String remotePath = Utils.readContentsAsString(remoteFile);
-        return new Remote(name, remotePath);
+        Remote remote = new Remote(name, remotePath);
+        return remote;
     }
 
     public void save() {

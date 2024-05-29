@@ -58,6 +58,9 @@ public class FileBlob {
     }
 
     public static FileBlob fromSha(String sha) {
+        if (sha == null) {
+            return null;
+        }
         File fileblobFile = getFileBlobFile(Repository.getFileBlobsDir(GITLET_DIR), sha);
         assert fileblobFile != null;
         return new FileBlob(Utils.readContents(fileblobFile));
