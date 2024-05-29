@@ -199,7 +199,11 @@ public class Commit implements Serializable {
         return ancestry;
     }
 
-    public static String latestCommonAncestor(Commit left, Commit right, File leftDir, File rightDir) {
+    public static String latestCommonAncestor(Commit left,
+                                              Commit right,
+                                              File leftDir,
+                                              File rightDir
+    ) {
         Set<String> leftAncestry = getAncestry(leftDir, left);
 
         Deque<String> queue = new ArrayDeque<>();
@@ -244,8 +248,8 @@ public class Commit implements Serializable {
             timestamp
         );
 
-        // after creating all the objects, save to disk, starting with updating the working directory
-        // (which will throw exception if there is a file in the way)
+        // after creating all the objects, save to disk, starting with updating the working
+        // directory (which will throw exception if there is a file in the way)
         newFolder.writeToWorkingDirectory(new WorkingDirectory());
         newFolder.saveToSha(newFolderSha);
         newCommit.save();

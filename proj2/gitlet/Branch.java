@@ -102,7 +102,8 @@ public class Branch {
         assert currentCommit != null;
         assert givenCommit != null;
 
-        String lcaSha = Commit.latestCommonAncestor(currentCommit, givenCommit, GITLET_DIR, GITLET_DIR);
+        String lcaSha =
+            Commit.latestCommonAncestor(currentCommit, givenCommit, GITLET_DIR, GITLET_DIR);
         if (Objects.equals(givenCommitSha, lcaSha)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             return;
@@ -115,7 +116,8 @@ public class Branch {
         Commit lcaCommit = Commit.fromSha(lcaSha);
         assert lcaCommit != null;
 
-        Commit newCommit = Commit.createMergeCommit(currentCommit, givenCommit, lcaCommit, givenBranch.name, name);
+        Commit newCommit =
+            Commit.createMergeCommit(currentCommit, givenCommit, lcaCommit, givenBranch.name, name);
 
         setCommitSha(newCommit.getSha());
         save();
