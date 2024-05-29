@@ -69,7 +69,8 @@ public class Commit implements Serializable {
 
     public static boolean doesShaExist(String commitSha) {
         File commitFile = findCommitPath(Repository.getCommitsDir(Repository.GITLET_DIR), commitSha);
-        return (commitFile != null);
+        assert commitFile != null;
+        return commitFile.exists();
     }
 
     public static Commit fromSha(String commitSha) {
@@ -83,7 +84,7 @@ public class Commit implements Serializable {
 
     public static Commit fromRemote(Remote remote, String commitSha) {
         File commitsDir = Repository.getCommitsDir(remote.getRemotePath());
-        File commitFile = findCommitPath(commitsDir, commitSha);
+        File commitFile = findCommitPath(commitsDir , commitSha);
         return Utils.readObject(commitFile, Commit.class);
     }
 
