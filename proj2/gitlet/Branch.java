@@ -2,10 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 public class Branch {
     private final String name;
@@ -16,8 +13,8 @@ public class Branch {
         this.commitSha = commitSha;
     }
 
-    public static Branch fromBranchName(String name) {
-        File branchFile = Utils.join(Repository.HEADS_FOLDER, name);
+    private static Branch fromFolderAndName(File gitletDir, String name) {
+        File branchFile = Utils.join(Repository.getHeadsDir(gitletDir), name);
         if (!branchFile.exists()) {
             return null;
         }
@@ -25,8 +22,17 @@ public class Branch {
         return new Branch(name, commitSha);
     }
 
+    public static Branch fromBranchName(String name) {
+        return fromFolderAndName(Repository.GITLET_DIR, name);
+    }
+
+    public static Branch fromRemote(Remote remote, String branchName) {
+        File directory = remote.getRemotePath();
+        return fromFolderAndName(directory, branchName);
+    }
+
     public void save() {
-        File branchFile = Utils.join(Repository.HEADS_FOLDER, name);
+        File branchFile = Utils.join(Repository.getHeadsDir(Repository.GITLET_DIR), name);
         if (!branchFile.exists()) {
             try {
                 branchFile.createNewFile();
@@ -38,7 +44,7 @@ public class Branch {
     }
 
     public void delete() {
-        File branchFile = Utils.join(Repository.HEADS_FOLDER, name);
+        File branchFile = Utils.join(Repository.getHeadsDir(Repository.GITLET_DIR), name);
         branchFile.delete();
     }
 

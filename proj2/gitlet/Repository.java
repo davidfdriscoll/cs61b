@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.nio.file.FileSystems;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -15,15 +16,28 @@ public class Repository {
     public static final File CWD = USER_DIR;
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
-    /** objects folder within .gitlet directory */
-    public static final File OBJECTS_FOLDER = Utils.join(GITLET_DIR, "objects");
-    public static final File FOLDERS_FOLDER = join(OBJECTS_FOLDER, "folders");
-    public static final File FILEBLOBS_FOLDER = join(OBJECTS_FOLDER, "files");
-    public static final File COMMITS_FOLDER = join(OBJECTS_FOLDER, "commits");
-    public static final File REFS_FOLDER = Utils.join(GITLET_DIR, "refs");
-    public static final File HEADS_FOLDER = join(REFS_FOLDER, "heads");
-    public static final File REMOTES_FOLDER = join(REFS_FOLDER, "remotes");
 
+    public static File getObjectsDir(File gitletDir) {
+        return Utils.join(gitletDir, "objects");
+    }
+    public static File getFoldersDir(File gitletDir) {
+        return join(getObjectsDir(gitletDir), "folders");
+    }
+    public static File getFileBlobsDir(File gitletDir) {
+        return join(getObjectsDir(gitletDir), "files");
+    }
+    public static File getCommitsDir(File gitletDir) {
+        return join(getObjectsDir(gitletDir), "commits");
+    }
+    public static File getRefsDir(File gitletDir) {
+        return Utils.join(gitletDir, "refs");
+    }
+    public static File getHeadsDir(File gitletDir) {
+        return join(getRefsDir(gitletDir), "heads");
+    }
+    public static File getRemotesDir(File gitletDir) {
+        return join(getRefsDir(gitletDir), "remotes");
+    }
 
     public static void init() {
         if (GITLET_DIR.exists()) {
@@ -34,13 +48,13 @@ public class Repository {
         }
 
         GITLET_DIR.mkdir();
-        OBJECTS_FOLDER.mkdir();
-        COMMITS_FOLDER.mkdir();
-        FILEBLOBS_FOLDER.mkdir();
-        FOLDERS_FOLDER.mkdir();
-        REFS_FOLDER.mkdir();
-        HEADS_FOLDER.mkdir();
-        REMOTES_FOLDER.mkdir();
+        getObjectsDir(GITLET_DIR).mkdir();
+        getCommitsDir(GITLET_DIR).mkdir();
+        getFileBlobsDir(GITLET_DIR).mkdir();
+        getFoldersDir(GITLET_DIR).mkdir();
+        getRefsDir(GITLET_DIR).mkdir();
+        getHeadsDir(GITLET_DIR).mkdir();
+        getRemotesDir(GITLET_DIR).mkdir();
 
         Folder emptyFolder = Folder.emptyFolder();
         String emptyFolderSha = emptyFolder.generateSha();
@@ -185,7 +199,7 @@ public class Repository {
     }
 
     public static void status() {
-        List<String> branchNames = Utils.plainFilenamesIn(HEADS_FOLDER);
+        List<String> branchNames = Utils.plainFilenamesIn(getHeadsDir(GITLET_DIR));
         assert branchNames != null;
         Collections.sort(branchNames);
         String currentBranchName = Head.getBranchName();
@@ -258,6 +272,11 @@ public class Repository {
 
         Remote newRemote = new Remote(remoteName, remotePath);
         newRemote.save();
+
+        File headsDir = join(getHeadsDir(GITLET_DIR), remoteName);
+        if (!headsDir.exists()) {
+            headsDir.mkdir();
+        }
     }
 
     public static void removeRemote(String remoteName) {
@@ -268,7 +287,6 @@ public class Repository {
         }
         remote.delete();
     }
-
 
     public static void checkoutBranch(String branchName) {
         Branch.checkout(branchName);
@@ -300,5 +318,50 @@ public class Repository {
         Branch currentBranch = Branch.fromBranchName(currentBranchName);
         assert currentBranch != null;
         currentBranch.merge(mergeBranch);
+    }
+
+    public static void fetch(String remoteName, String remoteBranchName) {
+        Remote remote = Remote.fromRemoteName(remoteName);
+        assert remote != null;
+        Branch remoteBranch = Branch.fromRemote(remote, remoteBranchName);
+        String remoteCommitSha = remoteBranch.getCommitSha();
+
+        String localName = remoteName + FileSystems.getDefault().getSeparator() + remoteBranchName;
+        Branch localBranch = Branch.fromBranchName(localName);
+        if (localBranch == null) {
+            localBranch = new Branch(localName, remoteCommitSha);
+        } else {
+            localBranch.setCommitSha(remoteCommitSha);
+        }
+        localBranch.save();
+
+        Deque<String> queue = new ArrayDeque<>();
+        queue.add(remoteCommitSha);
+
+        while (!queue.isEmpty()) {
+            String commitSha = queue.removeFirst();
+            if (commitSha.equals("-1") || Commit.doesShaExist(commitSha)) {
+                continue;
+            }
+            Commit commit = Commit.fromRemote(remote, commitSha);
+            queue.add(commit.getParentSha());
+            queue.add(commit.getMergeParentSha());
+            commit.save();
+
+            String folderSha = commit.getFolderSha();
+            Folder folder = Folder.fromRemote(remote, folderSha);
+            if (Folder.fromSha(folderSha) != null) {
+                continue;
+            }
+            folder.saveToSha(folderSha);
+
+            for (String fileSha : folder.folderMap().values()) {
+                if (FileBlob.shaExists(fileSha)) {
+                    continue;
+                }
+                FileBlob blob = FileBlob.fromRemoteSha(remote, fileSha);
+                blob.save();
+            }
+        }
     }
 }

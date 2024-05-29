@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import static gitlet.Repository.CWD;
+import static gitlet.Repository.GITLET_DIR;
 
 public class Folder implements Serializable {
     // TreeMap<filename, fileblobsha>
@@ -30,7 +31,16 @@ public class Folder implements Serializable {
     }
 
     public static Folder fromSha(String folderSha) {
-        File folderFile = Utils.join(Repository.FOLDERS_FOLDER, folderSha);
+        File folderFile = Utils.join(Repository.getFoldersDir(GITLET_DIR), folderSha);
+        if (!folderFile.exists()) {
+            return null;
+        }
+        return fromFile(folderFile);
+    }
+
+    public static Folder fromRemote(Remote remote, String folderSha) {
+        File folderDir = Repository.getFoldersDir(remote.getRemotePath());
+        File folderFile = Utils.join(folderDir, folderSha);
         return fromFile(folderFile);
     }
 
@@ -48,7 +58,7 @@ public class Folder implements Serializable {
     }
 
     public void saveToSha(String sha) {
-        File folderFile = Utils.join(Repository.FOLDERS_FOLDER, sha);
+        File folderFile = Utils.join(Repository.getFoldersDir(GITLET_DIR), sha);
         saveToFile(folderFile);
     }
 
@@ -87,6 +97,7 @@ public class Folder implements Serializable {
             throw new RuntimeException("untracked file");
         }
 
+
         List<String> currentFilenames = wd.getFiles();
         for (String currentFilename: currentFilenames) {
             if (!containsFile(currentFilename)) {
@@ -105,5 +116,8 @@ public class Folder implements Serializable {
 
     public Set<String> trackedFiles() {
         return folder.keySet();
+    }
+    public Map<String, String> folderMap() {
+        return folder;
     }
 }

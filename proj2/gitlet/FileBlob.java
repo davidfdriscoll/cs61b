@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static gitlet.Repository.CWD;
+import static gitlet.Repository.*;
 
 public class FileBlob {
     private byte[] contents;
@@ -34,17 +34,35 @@ public class FileBlob {
     }
 
     public void save() {
-        File blobFile = Utils.join(Repository.FILEBLOBS_FOLDER, sha);
+        File blobFile = Utils.join(Repository.getFileBlobsDir(GITLET_DIR), sha);
         write(blobFile);
     }
 
-    public static FileBlob fromSha(String sha) {
+    private static File getFileBlobFile(File folder, String sha) {
         try {
-            Utils.join(Repository.FILEBLOBS_FOLDER, sha);
+            Utils.join(folder, sha);
         } catch (NullPointerException e) {
             return null;
         }
-        File fileblobFile = Utils.join(Repository.FILEBLOBS_FOLDER, sha);
+        return Utils.join(folder, sha);
+    }
+
+    public static boolean shaExists(String sha) {
+        File fileblobFile = getFileBlobFile(Repository.getFileBlobsDir(GITLET_DIR), sha);
+        assert fileblobFile != null;
+        return fileblobFile.exists();
+    }
+
+    public static FileBlob fromSha(String sha) {
+        File fileblobFile = getFileBlobFile(Repository.getFileBlobsDir(GITLET_DIR), sha);
+        assert fileblobFile != null;
+        return new FileBlob(Utils.readContents(fileblobFile));
+    }
+
+    public static FileBlob fromRemoteSha(Remote remote, String sha) {
+        File fileblobDir = getFileBlobsDir(remote.getRemotePath());
+        File fileblobFile = getFileBlobFile(fileblobDir, sha);
+        assert fileblobFile != null;
         return new FileBlob(Utils.readContents(fileblobFile));
     }
 
@@ -76,9 +94,5 @@ public class FileBlob {
     public void writeToFile(String filename) {
         File workingLocation = Utils.join(CWD, filename);
         write(workingLocation);
-    }
-
-    public void print() {
-        System.out.println(new String(contents, StandardCharsets.UTF_8));
     }
 }

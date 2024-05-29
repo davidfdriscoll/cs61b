@@ -67,8 +67,13 @@ public class Commit implements Serializable {
         return message;
     }
 
+    public static boolean doesShaExist(String commitSha) {
+        File commitFile = findCommitPath(Repository.getCommitsDir(Repository.GITLET_DIR), commitSha);
+        return (commitFile != null);
+    }
+
     public static Commit fromSha(String commitSha) {
-        File commitFile = findCommitPath(commitSha);
+        File commitFile = findCommitPath(Repository.getCommitsDir(Repository.GITLET_DIR), commitSha);
         if (commitFile == null || !commitFile.exists()) {
             System.out.println("No commit with that id exists.");
             throw new RuntimeException();
@@ -76,9 +81,15 @@ public class Commit implements Serializable {
         return Utils.readObject(commitFile, Commit.class);
     }
 
-    private static File findCommitPath(String commitSha) {
+    public static Commit fromRemote(Remote remote, String commitSha) {
+        File commitsDir = Repository.getCommitsDir(remote.getRemotePath());
+        File commitFile = findCommitPath(commitsDir, commitSha);
+        return Utils.readObject(commitFile, Commit.class);
+    }
+
+    private static File findCommitPath(File folder, String commitSha) {
         String prefix = commitSha.substring(0, 2);
-        File prefixFolder = Utils.join(Repository.COMMITS_FOLDER, prefix);
+        File prefixFolder = Utils.join(folder, prefix);
         if (!prefixFolder.exists()) {
             return null;
         }
@@ -100,7 +111,7 @@ public class Commit implements Serializable {
 
     private static File createCommitPath(String commitSha) {
         String prefix = commitSha.substring(0, 2);
-        File prefixFolder = Utils.join(Repository.COMMITS_FOLDER, prefix);
+        File prefixFolder = Utils.join(Repository.getCommitsDir(Repository.GITLET_DIR), prefix);
         if (!prefixFolder.exists()) {
             prefixFolder.mkdir();
         }
@@ -108,11 +119,11 @@ public class Commit implements Serializable {
     }
 
     public static List<String> findAllCommitShas() {
-        String[] prefixes = Repository.COMMITS_FOLDER.list();
+        String[] prefixes = Repository.getCommitsDir(Repository.GITLET_DIR).list();
         List<String> commitShas = new ArrayList<>();
         assert prefixes != null;
         for (String prefix: prefixes) {
-            File prefixFolder = Utils.join(Repository.COMMITS_FOLDER, prefix);
+            File prefixFolder = Utils.join(Repository.getCommitsDir(Repository.GITLET_DIR), prefix);
             List<String> prefixedFiles = Utils.plainFilenamesIn(prefixFolder);
             assert prefixedFiles != null;
             commitShas.addAll(prefixedFiles);

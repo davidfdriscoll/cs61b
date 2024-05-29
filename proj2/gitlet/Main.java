@@ -97,6 +97,12 @@ public class Main {
                 remoteName = args[1];
                 Repository.removeRemote(remoteName);
                 break;
+            case "fetch":
+                validateNumArgs("fetch", args, 3);
+                remoteName = args[1];
+                branchName = args[2];
+                Repository.fetch(remoteName, branchName);
+                break;
             case "reset":
                 validateNumArgs("reset", args, 2);
                 commitSha = args[1];

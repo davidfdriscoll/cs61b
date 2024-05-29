@@ -5,15 +5,19 @@ import java.io.IOException;
 
 public class Remote {
     private final String name;
-    private String remotePath;
+    private final String remotePath;
 
-    public Remote(String name, String commitSha) {
+    public Remote(String name, String path) {
         this.name = name;
-        this.remotePath = commitSha;
+        this.remotePath = path;
+    }
+
+    public File getRemotePath() {
+        return Utils.join(Repository.CWD, remotePath);
     }
 
     public static Remote fromRemoteName(String name) {
-        File remoteFile = Utils.join(Repository.REMOTES_FOLDER, name);
+        File remoteFile = Utils.join(Repository.getRemotesDir(Repository.GITLET_DIR), name);
         if (!remoteFile.exists()) {
             return null;
         }
@@ -22,7 +26,7 @@ public class Remote {
     }
 
     public void save() {
-        File remoteFile = Utils.join(Repository.REMOTES_FOLDER, name);
+        File remoteFile = Utils.join(Repository.getRemotesDir(Repository.GITLET_DIR), name);
         if (!remoteFile.exists()) {
             try {
                 remoteFile.createNewFile();
@@ -34,7 +38,7 @@ public class Remote {
     }
 
     public void delete() {
-        File remoteFile = Utils.join(Repository.REMOTES_FOLDER, name);
+        File remoteFile = Utils.join(Repository.getRemotesDir(Repository.GITLET_DIR), name);
         remoteFile.delete();
     }
 }
