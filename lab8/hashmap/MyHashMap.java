@@ -206,8 +206,4 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         }
         return table;
     }
-
-    // TODO: Implement the methods of the Map61B Interface below
-    // Your code won't compile until you do so!
-
 }
