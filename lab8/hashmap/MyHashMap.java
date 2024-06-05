@@ -80,9 +80,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     private Set<Node> nodeSet() {
         Set<Node> set = new HashSet<>();
         for (Collection<Node> bucket: buckets) {
-            for (Node node: bucket) {
-                set.add(node);
-            }
+            set.addAll(bucket);
         }
         return set;
     }
@@ -138,7 +136,6 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     private Collection<Node>[] buckets;
     private int size = 0;
     private final double maxLoad;
-    // You should probably define some more!
 
     /** Constructors */
     public MyHashMap() {
