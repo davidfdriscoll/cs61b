@@ -1,0 +1,24 @@
+Enter # strings to insert into hashmap.ULLMap: 40000
+class hashmap.ULLMap: 5.82 sec
+
+Enter # strings to insert into your hashmap.MyHashMap: 40000
+class hashmap.MyHashMap: 0.06 sec
+
+Enter # strings to insert into Java's HashMap: 40000
+Java's Built-in HashMap: 0.04 sec
+
+java and our hashmap have similar performance (within an order
+of magnitude) and are both much, much faster than the
+simple linked list map.
+
+Enter # strings to insert into each map: 1280000
+class hashmap.MyHashMapALBuckets: 2.14 sec
+class hashmap.MyHashMapLLBuckets: 1.86 sec
+class hashmap.MyHashMapTSBuckets: 2.07 sec
+class hashmap.MyHashMapHSBuckets: 2.43 sec
+class hashmap.MyHashMapPQBuckets: 1.92 sec
+
+linked list is the fastest, but not by much.
+Linked list looks like the naive approach, but
+presumably if collisions in each bucket are kept small
+then the simplest approach is fastest.

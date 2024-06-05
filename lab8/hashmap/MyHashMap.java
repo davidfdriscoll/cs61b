@@ -55,21 +55,10 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     private void resize(int newSize) {
         Collection<Node>[] newBuckets = createTable(newSize);
         for (Node node: nodeSet()) {
-            putInBucketsMadeNewNode(newBuckets, node);
+            int bucketIdx = bucketIdx(newBuckets, node.key);
+            newBuckets[bucketIdx].add(node);
         }
         buckets = newBuckets;
-    }
-
-    private Boolean putInBucketsMadeNewNode(Collection<Node>[] localBuckets, Node node) {
-        Node existingNode = getNode(node.key);
-        if (existingNode != null) {
-            existingNode.value = node.value;
-            return false;
-        } else {
-            int bucketIdx = bucketIdx(localBuckets, node.key);
-            localBuckets[bucketIdx].add(node);
-            return true;
-        }
     }
 
     @Override
@@ -78,7 +67,12 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
             resize(buckets.length * 2);
         }
         Node node = createNode(key, value);
-        if (putInBucketsMadeNewNode(buckets, node)) {
+        Node existingNode = getNode(node.key);
+        if (existingNode != null) {
+            existingNode.value = node.value;
+        } else {
+            int bucketIdx = bucketIdx(buckets, node.key);
+            buckets[bucketIdx].add(node);
             size++;
         }
     }
@@ -104,12 +98,19 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+        Node node = getNode(key);
+        int bucketIdx = bucketIdx(buckets, key);
+        Collection<Node> bucket = buckets[bucketIdx];
+        bucket.remove(node);
+        if (node == null) {
+            return null;
+        }
+        return node.value;
     }
 
     @Override
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException();
+        return remove(key);
     }
 
     @Override
@@ -132,19 +133,20 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     }
 
     /* Instance Variables */
-    private static Integer defaultSize = 4;
+    private static final Integer defaultSize = 16;
+    private static final Double defaultLoad = 0.75;
     private Collection<Node>[] buckets;
     private int size = 0;
-    private double maxLoad = Double.POSITIVE_INFINITY;
+    private final double maxLoad;
     // You should probably define some more!
 
     /** Constructors */
     public MyHashMap() {
-        buckets = createTable(defaultSize);
+        this(defaultSize, defaultLoad);
     }
 
     public MyHashMap(int initialSize) {
-        buckets = createTable(initialSize);
+        this(initialSize, defaultLoad);
     }
 
     /**
