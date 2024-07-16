@@ -2,12 +2,27 @@ package byow.Core;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
+import byow.WorldBuilder.WorldBuilder;
+
+import java.util.Random;
 
 public class Engine {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
-    public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
+    public static final int WIDTH = 40;
+    public static final int HEIGHT = 40;
+
+    private long seed;
+    private Random random;
+
+    public Engine() {
+        ter.initialize(WIDTH, HEIGHT);
+    }
+
+    public void setSeed(long seed) {
+        this.seed = seed;
+        this.random = new Random(this.seed);
+    }
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -46,7 +61,15 @@ public class Engine {
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
 
-        TETile[][] finalWorldFrame = null;
-        return finalWorldFrame;
+        // input of format "n123s" in stage 1
+        String seedString = input.substring(1, input.length() - 1);
+        long seed = Long.parseLong(seedString);
+        setSeed(seed);
+
+        return WorldBuilder.generateWorld(random);
+    }
+
+    public void renderTiles(TETile[][] tiles) {
+        ter.renderFrame(tiles);
     }
 }

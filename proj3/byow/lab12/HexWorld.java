@@ -91,7 +91,7 @@ public class HexWorld {
             addHexagon(tiles, hexagonX, y, hexagonSize, randomTile());
         }
     }
-    
+
     public static void drawTesselationColumn(TETile[][] tiles, int x, int y, int hexagonSize, int rows, int hexagonsPerRow) {
         int hexagonDiameter = getHexagonDiameter(hexagonSize);
         int yOffset = hexagonDiameter - hexagonSize + 2;
