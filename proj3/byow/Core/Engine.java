@@ -7,17 +7,12 @@ import byow.WorldBuilder.WorldBuilder;
 import java.util.Random;
 
 public class Engine {
-    TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 40;
     public static final int HEIGHT = 40;
 
     private long seed;
     private Random random;
-
-    public Engine() {
-        ter.initialize(WIDTH, HEIGHT);
-    }
 
     public void setSeed(long seed) {
         this.seed = seed;
@@ -67,9 +62,5 @@ public class Engine {
         setSeed(seed);
 
         return WorldBuilder.generateWorld(random);
-    }
-
-    public void renderTiles(TETile[][] tiles) {
-        ter.renderFrame(tiles);
     }
 }

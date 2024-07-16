@@ -1,6 +1,7 @@
 package byow.WorldBuilder;
 
 import byow.Core.Engine;
+import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import java.util.HashSet;
 import java.util.Random;
@@ -16,9 +17,11 @@ public class WorldBuilder {
     private static final double ROOM_SIZE_VARIABLE_PROPORTION = 0.5;
 
     public static void main(String[] args) {
+        TERenderer ter = new TERenderer();
+        ter.initialize(WIDTH, HEIGHT);
         Engine engine = new Engine();
         TETile[][] tiles = engine.interactWithInputString("N14543S");
-        engine.renderTiles(tiles);
+        ter.renderFrame(tiles);
     }
 
     public static TETile[][] generateWorld(Random random) {
